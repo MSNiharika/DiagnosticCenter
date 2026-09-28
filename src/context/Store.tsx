@@ -1,0 +1,411 @@
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
+import type { ReactNode } from "react"
+import { analytesFor, packageById, testById } from "../data/catalog"
+import { seedOrders, seedPatients, seedQc, seedRiders, seedStock } from "../data/ops"
+import type {
+  CartItem,
+  Gender,
+  Order,
+  OrderStatus,
+  Patient,
+  PayMode,
+  QcLot,
+  Rider,
+  Stock,
+  VisitMode,
+} from "../data/types"
+import { nextStatus } from "../data/types"
+import { digits, flagFor, loadStore } from "../lib/utils"
+
+export type Session =
+  | { role: "patient"; name: string; phone: string }
+  | { role: "staff"; name: string }
+
+type PlaceInput = {
+  mode: VisitMode
+  centre: string
+  slot: string
+  address?: string
+  patient: { name: string; phone: string; age: number; gender: Gender }
+  total: number
+  pay: PayMode
+}
+
+type Store = {
+  city: string
+  setCity: (city: string) => void
+  cart: CartItem[]
+  addTest: (id: string) => void
+  addPackage: (id: string) => void
+  removeItem: (key: string) => void
+  clearCart: () => void
+  cartTotal: number
+  orders: Order[]
+  patients: Patient[]
+  inventory: Stock[]
+  qc: QcLot[]
+  riders: Rider[]
+  toast: string | null
+  notify: (message: string) => void
+  placeOrder: (input: PlaceInput) => Order
+  advance: (id: string) => void
+  setStatus: (id: string, status: OrderStatus) => void
+  setPaid: (id: string) => void
+  setPriority: (id: string) => void
+  setResult: (id: string, index: number, value: string) => void
+  setNote: (id: string, note: string) => void
+  release: (id: string) => void
+  addPatient: (patient: Omit<Patient, "mrn">) => void
+  reorder: (sku: string) => void
+  logQc: (id: string) => void
+  advanceRider: (id: string) => void
+  resetDemo: () => void
+  session: Session | null
+  signInPatient: (phone: string, password: string) => string | null
+  signInStaff: (id: string, password: string) => string | null
+  signOut: () => void
+}
+
+const Ctx = createContext<Store | null>(null)
+
+const riderFlow: Rider["status"][] = ["Assigned", "En route", "Collected", "Dropped at lab"]
+
+export function StoreProvider({ children }: { children: ReactNode }) {
+  const [city, setCityState] = useState(() => localStorage.getItem("aurora-city") || "Hyderabad")
+  const [cart, setCart] = useState<CartItem[]>(() => loadStore("aurora-cart", []))
+  const [orders, setOrders] = useState<Order[]>(() => loadStore("aurora-orders", seedOrders))
+  const [patients, setPatients] = useState<Patient[]>(() => loadStore("aurora-patients", seedPatients))
+  const [inventory, setInventory] = useState<Stock[]>(() => loadStore("aurora-stock", seedStock))
+  const [qc, setQc] = useState<QcLot[]>(() => loadStore("aurora-qc", seedQc))
+  const [riders, setRiders] = useState<Rider[]>(() => loadStore("aurora-riders", seedRiders))
+  const [toast, setToast] = useState<string | null>(null)
+  const [session, setSession] = useState<Session | null>(() => loadStore("aurora-session", null))
+  const timer = useRef<number | null>(null)
+
+  useEffect(() => {
+    sessionStorage.setItem("aurora-cart", JSON.stringify(cart))
+  }, [cart])
+  useEffect(() => {
+    sessionStorage.setItem("aurora-orders", JSON.stringify(orders))
+  }, [orders])
+  useEffect(() => {
+    sessionStorage.setItem("aurora-patients", JSON.stringify(patients))
+  }, [patients])
+  useEffect(() => {
+    sessionStorage.setItem("aurora-stock", JSON.stringify(inventory))
+  }, [inventory])
+  useEffect(() => {
+    sessionStorage.setItem("aurora-qc", JSON.stringify(qc))
+  }, [qc])
+  useEffect(() => {
+    sessionStorage.setItem("aurora-riders", JSON.stringify(riders))
+  }, [riders])
+  useEffect(() => {
+    sessionStorage.setItem("aurora-session", JSON.stringify(session))
+  }, [session])
+
+  const notify = useCallback((message: string) => {
+    setToast(message)
+    if (timer.current) window.clearTimeout(timer.current)
+    timer.current = window.setTimeout(() => setToast(null), 2600)
+  }, [])
+
+  const setCity = useCallback((next: string) => {
+    setCityState(next)
+    localStorage.setItem("aurora-city", next)
+  }, [])
+
+  const addTest = useCallback(
+    (id: string) => {
+      const test = testById(id)
+      if (!test) return
+      const key = `test:${id}`
+      if (cart.some((item) => item.key === key)) {
+        notify(`${test.name} is already in the booking`)
+        return
+      }
+      setCart((items) => [...items, { key, kind: "test", id, name: test.name, price: test.price, testIds: [id] }])
+      notify(`${test.name} added`)
+    },
+    [cart, notify],
+  )
+
+  const addPackage = useCallback(
+    (id: string) => {
+      const item = packageById(id)
+      if (!item) return
+      const key = `package:${id}`
+      if (cart.some((entry) => entry.key === key)) {
+        notify(`${item.name} is already in the booking`)
+        return
+      }
+      setCart((items) => [
+        ...items,
+        { key, kind: "package", id, name: item.name, price: item.price, testIds: item.testIds },
+      ])
+      notify(`${item.name} added`)
+    },
+    [cart, notify],
+  )
+
+  const removeItem = useCallback((key: string) => {
+    setCart((items) => items.filter((item) => item.key !== key))
+  }, [])
+
+  const clearCart = useCallback(() => setCart([]), [])
+
+  const cartTotal = useMemo(() => cart.reduce((sum, item) => sum + item.price, 0), [cart])
+
+  const placeOrder = useCallback(
+    (input: PlaceInput) => {
+      const testIds = [...new Set(cart.flatMap((item) => item.testIds))]
+      const departments = new Set(testIds.map((id) => testById(id)?.department).filter(Boolean))
+      const order: Order = {
+        id: `AR-${Date.now().toString().slice(-6)}`,
+        patient: input.patient.name,
+        phone: input.patient.phone,
+        age: input.patient.age,
+        gender: input.patient.gender,
+        slot: input.slot,
+        centre: input.centre,
+        mode: input.mode,
+        address: input.address,
+        items: cart.map((item) => ({ name: item.name, price: item.price })),
+        testIds,
+        total: input.total,
+        pay: input.pay,
+        paid: input.pay !== "Pay at centre",
+        status: "Booked",
+        department: departments.size > 1 ? "Multi-department" : ([...departments][0] ?? "Front desk"),
+        priority: "Routine",
+        results: analytesFor(testIds),
+        note: "",
+      }
+      setOrders((prev) => [order, ...prev])
+      setPatients((prev) => {
+        if (prev.some((person) => person.phone === input.patient.phone)) return prev
+        return [
+          {
+            mrn: `AU-${10430 + prev.length}`,
+            name: input.patient.name,
+            phone: input.patient.phone,
+            age: input.patient.age,
+            gender: input.patient.gender,
+            city,
+          },
+          ...prev,
+        ]
+      })
+      setCart([])
+      notify(`Booking ${order.id} is in the queue`)
+      return order
+    },
+    [cart, city, notify],
+  )
+
+  const setStatus = useCallback((id: string, status: OrderStatus) => {
+    setOrders((prev) =>
+      prev.map((order) =>
+        order.id === id
+          ? {
+              ...order,
+              status,
+              authorisedBy: status === "Released" ? "Dr. Meera Iyer" : order.authorisedBy,
+            }
+          : order,
+      ),
+    )
+  }, [])
+
+  const advance = useCallback(
+    (id: string) => {
+      const order = orders.find((item) => item.id === id)
+      if (!order) return
+      const status = nextStatus(order.status)
+      if (!status) return
+      setStatus(id, status)
+      notify(`${order.id} → ${status}`)
+    },
+    [notify, orders, setStatus],
+  )
+
+  const setPaid = useCallback(
+    (id: string) => {
+      setOrders((prev) => prev.map((order) => (order.id === id ? { ...order, paid: true } : order)))
+      notify("Payment recorded")
+    },
+    [notify],
+  )
+
+  const setPriority = useCallback((id: string) => {
+    setOrders((prev) =>
+      prev.map((order) =>
+        order.id === id
+          ? { ...order, priority: order.priority === "Urgent" ? "Routine" : "Urgent" }
+          : order,
+      ),
+    )
+  }, [])
+
+  const setResult = useCallback((id: string, index: number, value: string) => {
+    setOrders((prev) =>
+      prev.map((order) => {
+        if (order.id !== id) return order
+        const results = order.results.map((row, rowIndex) =>
+          rowIndex === index ? { ...row, value, flag: flagFor(value, row.ref) } : row,
+        )
+        return { ...order, results }
+      }),
+    )
+  }, [])
+
+  const setNote = useCallback((id: string, note: string) => {
+    setOrders((prev) => prev.map((order) => (order.id === id ? { ...order, note } : order)))
+  }, [])
+
+  const release = useCallback(
+    (id: string) => {
+      const order = orders.find((item) => item.id === id)
+      if (!order) return
+      if (order.results.length === 0 || order.results.some((row) => !row.value.trim())) {
+        notify("Enter every result on the worklist before release")
+        return
+      }
+      setStatus(id, "Released")
+      notify(`${order.id} released to the patient`)
+    },
+    [notify, orders, setStatus],
+  )
+
+  const addPatient = useCallback(
+    (patient: Omit<Patient, "mrn">) => {
+      setPatients((prev) => [{ ...patient, mrn: `AU-${10430 + prev.length}` }, ...prev])
+      notify(`${patient.name} registered`)
+    },
+    [notify],
+  )
+
+  const reorder = useCallback(
+    (sku: string) => {
+      setInventory((rows) =>
+        rows.map((row) => (row.sku === sku ? { ...row, onOrder: row.onOrder + row.reorderQty } : row)),
+      )
+      notify("Purchase order queued")
+    },
+    [notify],
+  )
+
+  const logQc = useCallback(
+    (id: string) => {
+      const stamp = new Date().toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit" })
+      setQc((rows) =>
+        rows.map((row) =>
+          row.id === id ? { ...row, last: stamp, runs: row.runs + 1, status: "In control" } : row,
+        ),
+      )
+      notify("QC point logged")
+    },
+    [notify],
+  )
+
+  const advanceRider = useCallback(
+    (id: string) => {
+      setRiders((rows) =>
+        rows.map((row) => {
+          if (row.id !== id) return row
+          const index = riderFlow.indexOf(row.status)
+          const status = riderFlow[Math.min(riderFlow.length - 1, index + 1)]
+          return { ...row, status }
+        }),
+      )
+    },
+    [],
+  )
+
+  const signInPatient = useCallback(
+    (phone: string, password: string) => {
+      if (password.trim().toLowerCase() !== "aurora") return "The demonstration password is aurora."
+      const mobile = digits(phone)
+      if (mobile.length !== 10) return "Use a 10-digit mobile number."
+      const known =
+        patients.find((person) => person.phone === mobile)?.name ??
+        orders.find((order) => order.phone === mobile)?.patient ??
+        "Patient"
+      setSession({ role: "patient", name: known, phone: mobile })
+      notify(`Signed in as ${known}`)
+      return null
+    },
+    [notify, orders, patients],
+  )
+
+  const signInStaff = useCallback(
+    (id: string, password: string) => {
+      const handle = id.trim().toLowerCase()
+      if (password.trim().toLowerCase() !== "aurora" || (handle !== "meera" && handle !== "staff")) {
+        return "Staff id meera, password aurora."
+      }
+      setSession({ role: "staff", name: "Dr. Meera Iyer" })
+      notify("Staff desk unlocked")
+      return null
+    },
+    [notify],
+  )
+
+  const signOut = useCallback(() => {
+    setSession(null)
+    notify("Signed out")
+  }, [notify])
+
+  const resetDemo = useCallback(() => {
+    setOrders(seedOrders)
+    setPatients(seedPatients)
+    setInventory(seedStock)
+    setQc(seedQc)
+    setRiders(seedRiders)
+    setCart([])
+    notify("Sample day restored")
+  }, [notify])
+
+  const value: Store = {
+    city,
+    setCity,
+    cart,
+    addTest,
+    addPackage,
+    removeItem,
+    clearCart,
+    cartTotal,
+    orders,
+    patients,
+    inventory,
+    qc,
+    riders,
+    toast,
+    notify,
+    placeOrder,
+    advance,
+    setStatus,
+    setPaid,
+    setPriority,
+    setResult,
+    setNote,
+    release,
+    addPatient,
+    reorder,
+    logQc,
+    advanceRider,
+    resetDemo,
+    session,
+    signInPatient,
+    signInStaff,
+    signOut,
+  }
+
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>
+}
+
+export function useStore() {
+  const value = useContext(Ctx)
+  if (!value) throw new Error("Store missing")
+  return value
+}
