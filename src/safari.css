@@ -50,8 +50,3 @@ html.is-safari .site-nav-enquire {
   font-size: 0.82rem;
 }
 
-html.is-safari .site-nav-item::after {
-  width: 0.22rem;
-  height: 0.22rem;
-  bottom: 0.08rem;
-}

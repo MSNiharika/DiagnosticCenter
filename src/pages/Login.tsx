@@ -45,7 +45,7 @@ export function Login() {
           id="patient"
           active={focus === "patient"}
           kicker="Patients and customers"
-          title="Patient / customer login"
+          title="Patient"
           copy="Reports, bookings, and home-collection status for one mobile number."
           fields={[
             { name: "phone", label: "Mobile", placeholder: "9848012345" },

@@ -118,7 +118,7 @@ export function SiteLayout() {
                 <div className="invisible absolute right-0 top-full z-50 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
                   <div role="menu" className="w-52 rounded-2xl border border-line bg-paper p-1.5 text-ink shadow-xl">
                     <Link role="menuitem" to="/login" className="block rounded-xl px-3 py-2 text-left text-sm normal-case tracking-normal hover:bg-ivory">
-                      Patient / customer
+                      Patient
                     </Link>
                     <Link role="menuitem" to="/login?as=staff" className="block rounded-xl px-3 py-2 text-left text-sm normal-case tracking-normal hover:bg-ivory">
                       Staff
@@ -245,7 +245,7 @@ export function SiteLayout() {
             {menuLogin && (
               <div className="grid gap-2 pl-1">
                 <Link to="/login" className="text-lg text-ink/70">
-                  Patient / customer
+                  Patient
                 </Link>
                 <Link to="/login?as=staff" className="text-lg text-ink/70">
                   Staff
