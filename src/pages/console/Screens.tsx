@@ -23,7 +23,7 @@ export function CommandScreen() {
 
   return (
     <div>
-      <Header kicker="Monday floor" title="Command centre" copy="The sample day at Banjara Hills and the rest of the network." />
+      <Header kicker="Monday floor" title="Command centre" copy="Today's samples at the Yanam centre and the Mettakuru desk." />
       <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <Kpi label="Orders on the board" value={String(orders.length)} hint="Including yesterday's released TSH" />
         <Kpi label="Waiting on a signature" value={String(review)} hint="Validation queue" />
@@ -71,7 +71,7 @@ export function CommandScreen() {
 export function DeskScreen() {
   const { patients, orders, addPatient, advance } = useStore()
   const [q, setQ] = useState("")
-  const [form, setForm] = useState({ name: "", phone: "", age: "", gender: "Female" as Gender, city: "Hyderabad" })
+  const [form, setForm] = useState({ name: "", phone: "", age: "", gender: "Female" as Gender, city: "Yanam" })
   const filtered = patients.filter((patient) => `${patient.name} ${patient.phone} ${patient.mrn}`.toLowerCase().includes(q.toLowerCase()))
 
   function submit(event: FormEvent) {
@@ -495,7 +495,7 @@ export function InsightsScreen() {
             <li className="flex justify-between"><span>Haematology</span><span>6 hours</span></li>
             <li className="flex justify-between"><span>Biochemistry</span><span>8 hours</span></li>
             <li className="flex justify-between"><span>Immunoassay</span><span>12 hours</span></li>
-            <li className="flex justify-between"><span>MRI</span><span>24 hours</span></li>
+            <li className="flex justify-between"><span>Ultrasound</span><span>Same day</span></li>
             <li className="flex justify-between"><span>HPV DNA</span><span>5 days</span></li>
           </ul>
         </article>

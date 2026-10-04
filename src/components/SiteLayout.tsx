@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { ChevronDown, Menu, Phone, ShoppingBag, X } from "lucide-react"
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom"
-import { cities } from "../data/network"
+import { centrePhone, centrePhoneTel, cities } from "../data/network"
 import { useStore } from "../context/Store"
 import { inr } from "../lib/utils"
 import { SocialLinks } from "./SocialLinks"
@@ -14,6 +14,7 @@ const links = [
   { to: "/collection", label: "Home collection" },
   { to: "/centres", label: "Centres" },
   { to: "/reports", label: "Reports" },
+  { to: "/about", label: "About" },
 ]
 
 export function SiteLayout() {
@@ -70,8 +71,8 @@ export function SiteLayout() {
                 </div>
               )}
             </div>
-            <a href="tel:18004202244" className="nav-link inline-flex items-center gap-1.5">
-              <Phone className="h-3.5 w-3.5 text-teal" /> 1800 420 2244
+            <a href={`tel:${centrePhoneTel}`} className="nav-link inline-flex items-center gap-1.5">
+              <Phone className="h-3.5 w-3.5 text-teal" /> {centrePhone}
             </a>
             <SessionLinks session={session} signOut={signOut} />
           </Container>
@@ -130,10 +131,10 @@ export function SiteLayout() {
           <div className="md:col-span-1">
             <Logo light />
             <p className="mt-4 max-w-xs text-sm leading-6 text-white/70">
-              Blood tests, scans, and health checkups. Home collection across the city, with reports released by a doctor.
+              A new diagnostic centre in Yanam. Blood tests, ultrasound, X-ray, and ECG, with home collection across town.
             </p>
-            <a href="tel:18004202244" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-white">
-              <Phone className="h-4 w-4" /> 1800 420 2244
+            <a href={`tel:${centrePhoneTel}`} className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-white">
+              <Phone className="h-4 w-4" /> {centrePhone}
             </a>
           </div>
           <FooterCol
@@ -160,7 +161,12 @@ export function SiteLayout() {
             title="The lab"
             items={[
               ["/about", "About Aurora"],
+              ["/about#journey", "Our journey"],
+              ["/about#equipment", "Equipment"],
+              ["/about#quality", "Quality"],
+              ["/about#awards", "Awards"],
               ["/platform", "Aurora OS"],
+              ["/register", "Register"],
               ["/login", "Patient login"],
               ["/login?as=staff", "Staff login"],
             ]}
@@ -203,11 +209,14 @@ export function SiteLayout() {
             <Link to="/corporate" className="border-b border-line py-2 text-base font-semibold">
               Corporate
             </Link>
-            <Link to="/about" className="border-b border-line py-2 text-base font-semibold">
-              About
+            <Link to="/about#journey" className="border-b border-line py-2 text-base font-semibold">
+              Our journey
             </Link>
-            <a href="tel:18004202244" className="border-b border-line py-2 text-base font-semibold">
-              1800 420 2244
+            <Link to="/about#equipment" className="border-b border-line py-2 text-base font-semibold">
+              Equipment
+            </Link>
+            <a href={`tel:${centrePhoneTel}`} className="border-b border-line py-2 text-base font-semibold">
+              {centrePhone}
             </a>
             <button type="button" className="border-b border-line py-2 text-left text-base font-semibold" aria-expanded={menuLogin} onClick={() => setMenuLogin((value) => !value)}>
               Login
@@ -216,6 +225,9 @@ export function SiteLayout() {
               <div className="grid gap-2 pl-1">
                 <Link to="/login" className="text-lg text-ink/70">
                   Patient
+                </Link>
+                <Link to="/register" className="text-lg text-ink/70">
+                  Register
                 </Link>
                 <Link to="/login?as=staff" className="text-lg text-ink/70">
                   Staff
@@ -288,7 +300,7 @@ function SessionLinks({
   if (session) {
     return (
       <>
-        <Link to={session.role === "staff" ? "/console" : "/reports"} className="nav-link">
+        <Link to={session.role === "staff" ? "/console" : "/profile"} className="nav-link">
           {session.role === "staff" ? "Console" : session.name.split(" ")[0]}
         </Link>
         <button type="button" className="nav-link" onClick={signOut}>
@@ -306,6 +318,9 @@ function SessionLinks({
         <div role="menu" className="w-52 rounded-md border border-line bg-paper p-1 text-ink shadow-lg">
           <Link role="menuitem" to="/login" className="block rounded px-3 py-2 text-left text-sm hover:bg-foam">
             Patient login
+          </Link>
+          <Link role="menuitem" to="/register" className="block rounded px-3 py-2 text-left text-sm hover:bg-foam">
+            Register
           </Link>
           <Link role="menuitem" to="/login?as=staff" className="block rounded px-3 py-2 text-left text-sm hover:bg-foam">
             Staff login

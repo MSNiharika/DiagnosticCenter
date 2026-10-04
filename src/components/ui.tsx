@@ -87,7 +87,7 @@ export function Logo({ light = false }: { light?: boolean }) {
   )
 }
 
-export function Photo({ src, alt, className }: { src: string; alt: string; className?: string }) {
+export function Photo({ src, alt, className, face = false }: { src: string; alt: string; className?: string; face?: boolean }) {
   const [ok, setOk] = useState(true)
   return (
     <div className={cn("relative overflow-hidden bg-pine", className)}>
@@ -95,7 +95,7 @@ export function Photo({ src, alt, className }: { src: string; alt: string; class
         <img
           src={src}
           alt={alt}
-          className="absolute inset-0 h-full w-full object-cover"
+          className={cn("absolute inset-0 h-full w-full object-cover", face && "object-[center_18%]")}
           onError={() => setOk(false)}
         />
       ) : (

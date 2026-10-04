@@ -2,12 +2,14 @@ import { BrowserRouter, Route, Routes } from "react-router-dom"
 import { ConsoleLayout } from "./components/ConsoleLayout"
 import { SiteLayout } from "./components/SiteLayout"
 import { StoreProvider } from "./context/Store"
-import { About, Contact, Corporate, Doctors, NotFound, Platform, Prescription } from "./pages/More"
+import { About } from "./pages/About"
+import { Contact, Corporate, Doctors, NotFound, Platform, Prescription } from "./pages/More"
 import { Booking } from "./pages/Booking"
 import { CentreDetail } from "./pages/CentreDetail"
 import { Centres } from "./pages/Centres"
 import { Collection } from "./pages/Collection"
 import { Home } from "./pages/Home"
+import { Profile, Register } from "./pages/Account"
 import { Login } from "./pages/Login"
 import { PackageDetail } from "./pages/PackageDetail"
 import { Packages } from "./pages/Packages"
@@ -46,6 +48,8 @@ export default function App() {
             <Route path="centres" element={<Centres />} />
             <Route path="centres/:id" element={<CentreDetail />} />
             <Route path="login" element={<Login />} />
+            <Route path="register" element={<Register />} />
+            <Route path="profile" element={<Profile />} />
             <Route path="reports" element={<Reports />} />
             <Route path="corporate" element={<Corporate />} />
             <Route path="prescription" element={<Prescription />} />

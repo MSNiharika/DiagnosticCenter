@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Link } from "react-router-dom"
 import { useSearchParams } from "react-router-dom"
 import { tests } from "../data/catalog"
@@ -13,7 +13,8 @@ import { Button, ButtonLink, Container, Eyebrow, Field, inputClass, useTitle } f
 export function Booking() {
   useTitle("Book")
   const [params] = useSearchParams()
-  const { cart, cartTotal, addTest, removeItem, city, placeOrder } = useStore()
+  const { cart, cartTotal, addTest, removeItem, city, placeOrder, session, accountFor } = useStore()
+  const mine = session?.role === "patient" ? accountFor(session.phone) : null
   const days = useMemo(() => upcomingDays(5), [])
   const firstOpen = SLOT_TIMES.every((time) => slotPassed(0, time)) ? 1 : 0
   const [step, setStep] = useState(0)
@@ -34,6 +35,25 @@ export function Booking() {
     gender: "Female" as Gender,
     address: "",
   })
+
+  useEffect(() => {
+    if (!mine) return
+    const born = new Date(mine.dob)
+    let years = 0
+    if (!Number.isNaN(born.getTime())) {
+      const now = new Date()
+      years = now.getFullYear() - born.getFullYear()
+      const month = now.getMonth() - born.getMonth()
+      if (month < 0 || (month === 0 && now.getDate() < born.getDate())) years -= 1
+    }
+    setForm((current) => ({
+      ...current,
+      name: mine.name,
+      phone: mine.phone,
+      gender: mine.gender,
+      age: current.age || String(Math.max(0, years)),
+    }))
+  }, [mine])
 
   const centre = centres.find((item) => item.id === centreId) ?? centres[0]
   const testIds = [...new Set(cart.flatMap((item) => item.testIds))]
@@ -80,9 +100,10 @@ export function Booking() {
   }
 
   function confirm() {
-    const phone = digits(form.phone)
+    const phone = mine ? mine.phone : digits(form.phone)
     const age = Number(form.age)
-    if (form.name.trim().length < 2) return setError("Add the patient's name.")
+    const patientName = mine ? mine.name : form.name.trim()
+    if (patientName.length < 2) return setError("Add the patient's name.")
     if (phone.length !== 10) return setError("Use a 10-digit mobile number.")
     if (!Number.isFinite(age) || age < 1 || age > 110) return setError("Age should be between 1 and 110.")
     if (mode === "Home collection" && form.address.trim().length < 8) return setError("Add a full collection address.")
@@ -92,7 +113,7 @@ export function Booking() {
       centre: centre.name,
       slot: `${days[day]} · ${time}`,
       address: mode === "Home collection" ? form.address.trim() : undefined,
-      patient: { name: form.name.trim(), phone, age, gender: form.gender },
+      patient: { name: patientName, phone, age, gender: mine?.gender ?? form.gender },
       total,
       pay,
     })
@@ -258,7 +279,7 @@ export function Booking() {
               </Field>
               <div className="grid gap-3 sm:grid-cols-3">
                 <Field label="Mobile">
-                  <input className={inputClass} inputMode="numeric" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} />
+                  <input className={inputClass} inputMode="numeric" value={mine ? mine.phone : form.phone} readOnly={Boolean(mine)} onChange={(event) => setForm({ ...form, phone: event.target.value })} />
                 </Field>
                 <Field label="Age">
                   <input className={inputClass} inputMode="numeric" value={form.age} onChange={(event) => setForm({ ...form, age: event.target.value })} />

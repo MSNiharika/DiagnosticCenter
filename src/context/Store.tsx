@@ -21,6 +21,42 @@ export type Session =
   | { role: "patient"; name: string; phone: string }
   | { role: "staff"; name: string }
 
+export type Account = {
+  title: string
+  name: string
+  dob: string
+  gender: Gender
+  phone: string
+  altPhone: string
+  email: string
+  password: string
+}
+
+const seedAccounts: Account[] = [
+  {
+    title: "Ms",
+    name: "Meera Kapoor",
+    dob: "1992-04-12",
+    gender: "Female",
+    phone: "9848012345",
+    altPhone: "",
+    email: "meera.kapoor@example.com",
+    password: "aurora",
+  },
+]
+
+function loadAccounts(): Account[] {
+  try {
+    const raw = localStorage.getItem("aurora-accounts")
+    const parsed = raw ? (JSON.parse(raw) as Account[]) : []
+    const list = Array.isArray(parsed) ? parsed : []
+    const missing = seedAccounts.filter((seed) => !list.some((row) => row.phone === seed.phone))
+    return [...missing, ...list]
+  } catch {
+    return seedAccounts
+  }
+}
+
 type PlaceInput = {
   mode: VisitMode
   centre: string
@@ -61,6 +97,9 @@ type Store = {
   advanceRider: (id: string) => void
   resetDemo: () => void
   session: Session | null
+  accountFor: (phone: string) => Account | null
+  register: (account: Account) => string | null
+  updateProfile: (account: Account) => string | null
   signInPatient: (phone: string, password: string) => string | null
   signInStaff: (id: string, password: string) => string | null
   signOut: () => void
@@ -71,7 +110,12 @@ const Ctx = createContext<Store | null>(null)
 const riderFlow: Rider["status"][] = ["Assigned", "En route", "Collected", "Dropped at lab"]
 
 export function StoreProvider({ children }: { children: ReactNode }) {
-  const [city, setCityState] = useState(() => localStorage.getItem("aurora-city") || "Hyderabad")
+  const [city, setCityState] = useState(() => {
+    const saved = localStorage.getItem("aurora-city")
+    if (saved === "Yanam") return saved
+    localStorage.setItem("aurora-city", "Yanam")
+    return "Yanam"
+  })
   const [cart, setCart] = useState<CartItem[]>(() => loadStore("aurora-cart", []))
   const [orders, setOrders] = useState<Order[]>(() => loadStore("aurora-orders", seedOrders))
   const [patients, setPatients] = useState<Patient[]>(() => loadStore("aurora-patients", seedPatients))
@@ -80,6 +124,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const [riders, setRiders] = useState<Rider[]>(() => loadStore("aurora-riders", seedRiders))
   const [toast, setToast] = useState<string | null>(null)
   const [session, setSession] = useState<Session | null>(() => loadStore("aurora-session", null))
+  const [accounts, setAccounts] = useState<Account[]>(loadAccounts)
   const timer = useRef<number | null>(null)
 
   useEffect(() => {
@@ -103,6 +148,9 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     sessionStorage.setItem("aurora-session", JSON.stringify(session))
   }, [session])
+  useEffect(() => {
+    localStorage.setItem("aurora-accounts", JSON.stringify(accounts))
+  }, [accounts])
 
   const notify = useCallback((message: string) => {
     setToast(message)
@@ -322,20 +370,55 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     [],
   )
 
-  const signInPatient = useCallback(
-    (phone: string, password: string) => {
-      if (password.trim().toLowerCase() !== "aurora") return "The demonstration password is aurora."
-      const mobile = digits(phone)
-      if (mobile.length !== 10) return "Use a 10-digit mobile number."
-      const known =
-        patients.find((person) => person.phone === mobile)?.name ??
-        orders.find((order) => order.phone === mobile)?.patient ??
-        "Patient"
-      setSession({ role: "patient", name: known, phone: mobile })
-      notify(`Signed in as ${known}`)
+  const accountFor = useCallback(
+    (phone: string) => accounts.find((row) => row.phone === digits(phone)) ?? null,
+    [accounts],
+  )
+
+  const register = useCallback(
+    (account: Account) => {
+      const phone = digits(account.phone)
+      if (phone.length !== 10) return "Use a 10-digit mobile number."
+      if (accounts.some((row) => row.phone === phone)) return "This mobile is already registered. Sign in instead."
+      const next = { ...account, phone, altPhone: digits(account.altPhone) }
+      setAccounts((rows) => [...rows, next])
+      setPatients((prev) => [
+        { mrn: `AU-${10430 + prev.length}`, name: next.name, phone, age: ageFromDob(next.dob), gender: next.gender, city },
+        ...prev,
+      ])
+      setSession({ role: "patient", name: next.name, phone })
+      notify("Account created")
       return null
     },
-    [notify, orders, patients],
+    [accounts, city, notify],
+  )
+
+  const updateProfile = useCallback(
+    (account: Account) => {
+      if (session?.role !== "patient") return "Sign in to update your profile."
+      const phone = session.phone
+      if (!accounts.some((row) => row.phone === phone)) return "This account is not on file."
+      const next = { ...account, phone, altPhone: digits(account.altPhone) }
+      setAccounts((rows) => rows.map((row) => (row.phone === phone ? next : row)))
+      setSession({ role: "patient", name: next.name, phone })
+      notify("Profile updated")
+      return null
+    },
+    [accounts, notify, session],
+  )
+
+  const signInPatient = useCallback(
+    (phone: string, password: string) => {
+      const mobile = digits(phone)
+      if (mobile.length !== 10) return "Use a 10-digit mobile number."
+      const account = accounts.find((row) => row.phone === mobile)
+      if (!account) return "No registration for this mobile. Create an account first."
+      if (password.trim().toLowerCase() !== account.password.trim().toLowerCase()) return "That password does not match this mobile."
+      setSession({ role: "patient", name: account.name, phone: mobile })
+      notify(`Signed in as ${account.name}`)
+      return null
+    },
+    [accounts, notify],
   )
 
   const signInStaff = useCallback(
@@ -396,12 +479,25 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     advanceRider,
     resetDemo,
     session,
+    accountFor,
+    register,
+    updateProfile,
     signInPatient,
     signInStaff,
     signOut,
   }
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>
+}
+
+function ageFromDob(dob: string) {
+  const born = new Date(dob)
+  if (Number.isNaN(born.getTime())) return 0
+  const now = new Date()
+  let age = now.getFullYear() - born.getFullYear()
+  const month = now.getMonth() - born.getMonth()
+  if (month < 0 || (month === 0 && now.getDate() < born.getDate())) age -= 1
+  return Math.max(0, age)
 }
 
 export function useStore() {

@@ -30,7 +30,7 @@ const faqs = [
   },
   {
     q: "When is the report ready?",
-    a: "Routine blood work is reported the same day, often inside six hours of reaching the analyser. MRI, HPV, and vitamin D take longer — the turnaround is on the test.",
+    a: "Routine blood work is reported the same day, often inside six hours of reaching the analyser. Vitamin D and cultures take longer. The turnaround is written on the test.",
   },
   {
     q: "Who signs the report?",
@@ -48,10 +48,10 @@ export function Home() {
       <section className="border-b border-line bg-white">
         <Container className="grid items-center gap-8 py-8 lg:grid-cols-[1.15fr_0.85fr] lg:py-10">
           <div>
-            <p className="text-sm font-semibold text-teal">Lab tests, scans, and health checkups in {city}</p>
-            <h1 className="mt-2 max-w-xl">Book a test. Get the report the same day.</h1>
+            <p className="text-sm font-semibold text-teal">New diagnostic centre in {city}</p>
+            <h1 className="mt-2 max-w-xl">Book a blood test or ultrasound in Yanam.</h1>
             <p className="mt-3 max-w-lg text-sm leading-6 text-ink/70">
-              Home collection from 7:00 AM. NABL and ISO 15189 processing. A pathologist releases every report before you can open it.
+              Open on Ferry Road from 7:00 AM. Home collection across Yanam town, Mettakuru, Dariyalatippa, and Farampeta. Routine reports the same day, after a doctor signs.
             </p>
             <HeroSearch />
             <div className="mt-4 flex flex-wrap gap-2">
@@ -60,7 +60,7 @@ export function Home() {
                 ["Thyroid", "/tests?q=Thyroid"],
                 ["Vitamin D", "/tests?q=Vitamin"],
                 ["Full body checkup", "/packages"],
-                ["MRI", "/imaging"],
+                ["Ultrasound", "/imaging"],
               ].map(([label, to]) => (
                 <Link key={label} to={to} className="rounded-md border border-line bg-foam px-3 py-1.5 text-xs font-semibold text-ink hover:border-teal hover:text-teal">
                   {label}
@@ -70,12 +70,12 @@ export function Home() {
             <p className="mt-4 text-xs font-medium text-ink/60">Offer AURORA20 · 20% off · Next slot {nextSlotLabel()}</p>
           </div>
           <div className="overflow-hidden rounded-lg border border-line bg-white">
-            <Photo src={photos.lab} alt="Scientist at a laboratory bench" className="h-52 sm:h-64" />
+            <Photo src={photos.lab} alt="Pathologist checking a rack of blood samples" className="h-52 sm:h-64" />
             <div className="grid grid-cols-3 divide-x divide-line border-t border-line text-center">
               {[
                 ["6 hrs", "Routine reports"],
                 ["₹150", "Home visit under ₹500"],
-                ["NABL", "ISO 15189"],
+                ["Yanam", "Opened 2026"],
               ].map(([value, label]) => (
                 <div key={label} className="px-2 py-3">
                   <p className="text-sm font-bold text-teal">{value}</p>
@@ -181,15 +181,48 @@ export function Home() {
           <h2 className="mt-2 max-w-xl">Pathology, radiology, and cardiology</h2>
           <div className="mt-8 grid gap-3 md:grid-cols-4 md:grid-rows-2">
             <Dept href="/tests" image={photos.vials} title="Pathology" copy="Haematology, biochemistry, serology, and the counters that never close at lunch." className="md:col-span-2 md:row-span-2 min-h-72" />
-            <Dept href="/imaging" image={photos.mri} title="Radiology" copy="MRI, CT, ultrasound, mammography." className="min-h-44 md:col-span-2" />
-            <Dept href="/imaging" image={photos.consult} title="Cardiology" copy="ECG, echo, treadmill." className="min-h-44 md:col-span-2" />
+            <Dept href="/imaging" image={photos.mri} title="Ultrasound and X-ray" copy="Abdomen ultrasound and digital X-ray at the Yanam centre." className="min-h-44 md:col-span-2" />
+            <Dept href="/imaging" image={photos.consult} title="Heart studies" copy="ECG at Ferry Road. Home visits stay blood draws." className="min-h-44 md:col-span-2" />
+          </div>
+        </Container>
+      </section>
+
+      <section className="border-y border-line bg-white py-14">
+        <Container>
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <Eyebrow>Yanam</Eyebrow>
+              <h2 className="mt-2">Opened in 2026, on Ferry Road.</h2>
+            </div>
+            <Link to="/about" className="text-sm font-semibold text-teal">
+              About Aurora
+            </Link>
+          </div>
+          <div className="mt-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {[
+              ["2026", "New centre in Yanam"],
+              ["Ferry Road", "Blood tests, ultrasound, X-ray, ECG"],
+              ["7:00 AM", "Home collection across town"],
+              ["Mettakuru", "Morning sample desk"],
+            ].map(([value, label]) => (
+              <Link key={value} to="/about#journey" className="rounded-md border border-line bg-foam p-4 hover:border-teal">
+                <p className="text-xl font-bold text-teal">{value}</p>
+                <p className="mt-1 text-sm text-ink/70">{label}</p>
+              </Link>
+            ))}
+          </div>
+          <div className="mt-4 flex flex-wrap gap-3 text-sm font-semibold">
+            <Link to="/about#journey" className="text-coral">Our journey</Link>
+            <Link to="/about#equipment" className="text-coral">Equipment</Link>
+            <Link to="/about#quality" className="text-coral">Quality</Link>
+            <Link to="/about#awards" className="text-coral">Awards</Link>
           </div>
         </Container>
       </section>
 
       <section className="py-16">
         <Container className="grid items-center gap-10 lg:grid-cols-2">
-          <Photo src={photos.bench} alt="Sample tubes in a laboratory rack" className="h-[320px] rounded-md" />
+          <Photo src={photos.bench} alt="Biochemist loading sample tubes into an analyser" className="h-[320px] rounded-md" />
           <div>
             <Eyebrow>Home collection</Eyebrow>
             <h2 className="mt-2">Home sample collection</h2>
@@ -231,7 +264,7 @@ export function Home() {
               <h2 className="mt-2">Centres in {city}</h2>
             </div>
             <Link to="/centres" className="text-sm text-teal">
-              All cities
+              Centre details
             </Link>
           </div>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -283,7 +316,7 @@ export function Home() {
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {doctors.map((doctor) => (
               <Link key={doctor.id} to="/doctors" className="overflow-hidden rounded-md border border-line bg-white">
-                <Photo src={doctor.photo} alt="" className="h-56" />
+                <Photo src={doctor.photo} alt={doctor.name} face className="h-72" />
                 <div className="p-4">
                   <h3 className="font-medium">{doctor.name}</h3>
                   <p className="text-sm text-teal">{doctor.role}</p>

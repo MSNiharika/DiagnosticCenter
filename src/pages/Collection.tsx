@@ -12,7 +12,7 @@ export function Collection() {
           <Eyebrow>Home collection</Eyebrow>
           <h1 className="mt-2 font-display text-5xl tracking-tight">A person with a name, a sealed kit, and a slot you picked.</h1>
           <p className="mt-4 max-w-lg text-sm leading-7 text-ink/70">
-            Home visits cover blood and urine across every Aurora city. The sample is accessioned into the same queue as a centre draw, so the report does not take a side door.
+            Home visits cover blood and urine in Yanam town, Mettakuru, Dariyalatippa, and Farampeta. The sample joins the same queue as a draw at Ferry Road.
           </p>
           <div className="mt-6 flex flex-wrap gap-2">
             <ButtonLink to="/book?mode=home">Book a home slot</ButtonLink>
@@ -21,11 +21,11 @@ export function Collection() {
             </ButtonLink>
           </div>
         </div>
-        <Photo src={photos.vials} alt="Labelled sample tubes" className="h-[380px] rounded-[28px]" />
+        <Photo src={photos.vials} alt="Phlebotomist holding a rack of sample tubes" className="h-[380px] rounded-[28px]" />
       </Container>
       <Container className="grid gap-4 pb-8 md:grid-cols-3">
         {[
-          [Clock3, "6:30 to 6:00", "Morning routes leave before traffic. The last home slot is 5:30 PM."],
+          [Clock3, "7:00 AM start", "Morning routes leave from Ferry Road. The last home slot is 5:30 PM."],
           [Thermometer, "Logged cold chain", "Each box records temperature. A warm tube is rejected and redrawn."],
           [ShieldCheck, "Free over ₹500", "Shorter bills add ₹150 for the visit. Packages clear that easily."],
         ].map(([Icon, title, copy]) => (
@@ -46,14 +46,14 @@ export function Collection() {
           </ul>
           <h2 className="mt-8 font-display text-3xl">What stays at the centre</h2>
           <ul className="mt-4 space-y-2 text-sm text-ink/75">
-            <li>MRI, CT, ultrasound, X-ray, mammography</li>
+            <li>Ultrasound, digital X-ray, and ECG</li>
             <li>ECG, echo, and treadmill tests</li>
             <li>HPV swabs, which need a clinician's room</li>
           </ul>
         </div>
         <div className="rounded-[28px] border border-line bg-paper p-5">
           <p className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-brass">
-            <MapPin className="h-3.5 w-3.5" /> Cities on the route
+            <MapPin className="h-3.5 w-3.5" /> Yanam desks
           </p>
           <ul className="mt-4 divide-y divide-line">
             {centres.map((centre) => (

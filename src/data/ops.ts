@@ -10,12 +10,12 @@ function withValues(testIds: string[], values: Record<string, string>): Order["r
 }
 
 export const seedPatients: Patient[] = [
-  { mrn: "AU-10421", name: "Meera Kapoor", phone: "9848012345", age: 34, gender: "Female", city: "Hyderabad" },
-  { mrn: "AU-10422", name: "Rohan Desai", phone: "9988001122", age: 46, gender: "Male", city: "Mumbai" },
-  { mrn: "AU-10423", name: "Anita Rao", phone: "9000012345", age: 29, gender: "Female", city: "Hyderabad" },
-  { mrn: "AU-10424", name: "Imran Sheikh", phone: "9810011122", age: 52, gender: "Male", city: "Delhi" },
-  { mrn: "AU-10425", name: "Divya Nair", phone: "9845090909", age: 41, gender: "Female", city: "Bengaluru" },
-  { mrn: "AU-10426", name: "Karthik Iyer", phone: "9886010101", age: 37, gender: "Male", city: "Chennai" },
+  { mrn: "AU-10421", name: "Meera Kapoor", phone: "9848012345", age: 34, gender: "Female", city: "Yanam" },
+  { mrn: "AU-10422", name: "Rohan Desai", phone: "9988001122", age: 46, gender: "Male", city: "Yanam" },
+  { mrn: "AU-10423", name: "Anita Rao", phone: "9000012345", age: 29, gender: "Female", city: "Yanam" },
+  { mrn: "AU-10424", name: "Imran Sheikh", phone: "9810011122", age: 52, gender: "Male", city: "Yanam" },
+  { mrn: "AU-10425", name: "Divya Nair", phone: "9845090909", age: 41, gender: "Female", city: "Yanam" },
+  { mrn: "AU-10426", name: "Karthik Iyer", phone: "9886010101", age: 37, gender: "Male", city: "Yanam" },
 ]
 
 export const seedOrders: Order[] = [
@@ -26,9 +26,9 @@ export const seedOrders: Order[] = [
     age: 34,
     gender: "Female",
     slot: "Today · 7:10 AM",
-    centre: "Banjara Hills",
+    centre: "Yanam",
     mode: "Home collection",
-    address: "Flat 4B, Road No. 10, Banjara Hills",
+    address: "D. No. 4-120, Savithri Nagar, Yanam",
     items: [
       { name: "Complete Blood Count", price: 349 },
       { name: "Lipid Profile", price: 599 },
@@ -62,7 +62,7 @@ export const seedOrders: Order[] = [
     age: 46,
     gender: "Male",
     slot: "Today · 9:40 AM",
-    centre: "Bandra West",
+    centre: "Yanam",
     mode: "Centre visit",
     items: [{ name: "Heart Screen", price: 2499 }],
     testIds: ["lipid", "ecg", "crp", "hba1c", "echo"],
@@ -91,7 +91,7 @@ export const seedOrders: Order[] = [
     age: 29,
     gender: "Female",
     slot: "Today · 8:05 AM",
-    centre: "Banjara Hills",
+    centre: "Yanam",
     mode: "Centre visit",
     items: [{ name: "Complete Blood Count", price: 349 }],
     testIds: ["cbc"],
@@ -111,9 +111,9 @@ export const seedOrders: Order[] = [
     age: 52,
     gender: "Male",
     slot: "Today · 7:50 AM",
-    centre: "Greater Kailash",
+    centre: "Mettakuru",
     mode: "Home collection",
-    address: "M-18, Greater Kailash II",
+    address: "Main Road, Mettakuru, Yanam",
     items: [{ name: "Fever Panel", price: 1099 }],
     testIds: ["dengue", "cbc", "crp", "urine"],
     total: 1099,
@@ -132,9 +132,9 @@ export const seedOrders: Order[] = [
     age: 41,
     gender: "Female",
     slot: "Today · 10:20 AM",
-    centre: "Indiranagar",
+    centre: "Yanam",
     mode: "Home collection",
-    address: "12th Main, Indiranagar",
+    address: "Dariyalatippa, Yanam",
     items: [{ name: "Women's Vitality", price: 1899 }],
     testIds: ["cbc", "thyroid", "vitd", "iron", "ferritin"],
     total: 1899,
@@ -153,7 +153,7 @@ export const seedOrders: Order[] = [
     age: 37,
     gender: "Male",
     slot: "Today · 4:30 PM",
-    centre: "T. Nagar",
+    centre: "Yanam",
     mode: "Centre visit",
     items: [{ name: "MRI Brain", price: 5499 }],
     testIds: ["mri-brain"],
@@ -173,7 +173,7 @@ export const seedOrders: Order[] = [
     age: 45,
     gender: "Female",
     slot: "Tomorrow · 7:30 AM",
-    centre: "Jubilee Hills",
+    centre: "Yanam",
     mode: "Centre visit",
     items: [{ name: "Essential 6", price: 999 }],
     testIds: ["cbc", "lipid", "tsh", "lft", "kft", "urine"],
@@ -193,7 +193,7 @@ export const seedOrders: Order[] = [
     age: 31,
     gender: "Female",
     slot: "Yesterday · 8:15 AM",
-    centre: "Greater Kailash",
+    centre: "Mettakuru",
     mode: "Centre visit",
     items: [{ name: "TSH", price: 299 }],
     testIds: ["tsh"],
@@ -226,10 +226,10 @@ export const seedQc: QcLot[] = [
 ]
 
 export const seedRiders: Rider[] = [
-  { id: "r1", name: "Kiran Rao", zone: "Banjara · Jubilee", stops: 6, status: "En route", window: "6:30 – 10:30" },
-  { id: "r2", name: "Asha Pinto", zone: "Indiranagar", stops: 4, status: "Collected", window: "7:00 – 11:00" },
-  { id: "r3", name: "Mohit Kale", zone: "Bandra West", stops: 5, status: "Assigned", window: "7:30 – 12:00" },
-  { id: "r4", name: "Rekha Das", zone: "Greater Kailash", stops: 3, status: "Dropped at lab", window: "6:30 – 9:30" },
+  { id: "r1", name: "Kiran Rao", zone: "Yanam town", stops: 6, status: "En route", window: "7:00 – 11:00" },
+  { id: "r2", name: "Asha Pinto", zone: "Mettakuru", stops: 4, status: "Collected", window: "7:00 – 11:00" },
+  { id: "r3", name: "Mohit Kale", zone: "Dariyalatippa", stops: 5, status: "Assigned", window: "7:30 – 12:00" },
+  { id: "r4", name: "Rekha Das", zone: "Farampeta", stops: 3, status: "Dropped at lab", window: "7:00 – 10:00" },
 ]
 
 export const revenueSeries = [3.2, 3.6, 3.1, 4.4, 4.1, 5.2, 4.8]

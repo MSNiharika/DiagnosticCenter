@@ -12,8 +12,8 @@ export function Centres() {
 
   return (
     <Container className="py-12">
-      <Eyebrow>Network</Eyebrow>
-      <h1 className="mt-2 font-display text-5xl tracking-tight">Seven rooms. One report format.</h1>
+      <Eyebrow>Yanam</Eyebrow>
+      <h1 className="mt-2 font-display text-5xl tracking-tight">The Ferry Road lab, and a morning desk in Mettakuru.</h1>
       <div className="mt-6 flex flex-wrap gap-2">
         {["All", ...cities].map((item) => (
           <button

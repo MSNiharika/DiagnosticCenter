@@ -92,7 +92,7 @@ export function ConsoleLayout() {
           })}
         </nav>
         <div className="hidden border-t border-line px-4 py-4 text-xs text-ink/55 md:block">
-          <p>{session.name} · Banjara Hills</p>
+          <p>{session.name} · Yanam</p>
           <button type="button" className="mt-2 text-ink/80 underline-offset-2 hover:underline" onClick={resetDemo}>
             Restore sample day
           </button>

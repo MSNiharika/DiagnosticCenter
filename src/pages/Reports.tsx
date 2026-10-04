@@ -1,85 +1,74 @@
 import { useState } from "react"
 import { useSearchParams } from "react-router-dom"
+import { seedOrders } from "../data/ops"
 import { FLOW } from "../data/types"
 import type { Order } from "../data/types"
 import { useStore } from "../context/Store"
-import { digits, inr, phonePretty } from "../lib/utils"
-import { Button, Container, Eyebrow, Field, Flag, StatusPill, inputClass, useTitle } from "../components/ui"
+import { inr, phonePretty } from "../lib/utils"
+import { ButtonLink, Container, Eyebrow, Flag, StatusPill, useTitle } from "../components/ui"
 
 export function Reports() {
   useTitle("Reports")
   const [params] = useSearchParams()
-  const { orders, session } = useStore()
-  const [orderId, setOrderId] = useState(params.get("order") ?? "")
-  const [phone, setPhone] = useState(session?.role === "patient" ? session.phone : "")
-  const [match, setMatch] = useState<Order | null>(null)
-  const [miss, setMiss] = useState(false)
+  const { orders, session, accountFor } = useStore()
+  const account = session?.role === "patient" ? accountFor(session.phone) : null
+  const mine = session?.role === "patient" ? orders.filter((order) => order.phone === session.phone) : []
+  const sample = session?.role === "patient" ? sampleReport(session.name, session.phone, account) : null
+  const list = sample ? [...mine, sample] : mine
+  const requested = params.get("order")?.trim().toUpperCase()
+  const [picked, setPicked] = useState(requested && mine.some((order) => order.id.toUpperCase() === requested) ? requested : "")
+  const match = (picked ? list.find((order) => order.id === picked) : null) ?? sample ?? list[0] ?? null
 
-  function lookup(event?: { preventDefault: () => void }, preset?: { id: string; phone: string }) {
-    event?.preventDefault()
-    const id = (preset?.id ?? orderId).trim().toUpperCase()
-    const mobile = digits(preset?.phone ?? phone)
-    if (preset) {
-      setOrderId(preset.id)
-      setPhone(preset.phone)
-    }
-    const found = orders.find((order) => order.id.toUpperCase() === id && order.phone === mobile) ?? null
-    setMatch(found)
-    setMiss(!found)
+  if (session?.role !== "patient") {
+    return (
+      <Container className="py-12">
+        <Eyebrow>Patient portal</Eyebrow>
+        <h1 className="mt-2 max-w-xl">Sign in to see your reports.</h1>
+        <p className="mt-3 max-w-lg text-sm leading-6 text-ink/65">
+          Reports open only for the mobile number on the account. Register once, then sign in. You will not see another patient's bookings.
+        </p>
+        <div className="mt-6 flex flex-wrap gap-3">
+          <ButtonLink to="/login?next=/reports">Sign in</ButtonLink>
+          <ButtonLink to="/register" variant="ghost">
+            Register
+          </ButtonLink>
+        </div>
+        {session?.role === "staff" && (
+          <p className="mt-4 text-sm text-ink/60">
+            The lab queue is in the console. This page is the patient view.
+          </p>
+        )}
+      </Container>
+    )
   }
 
-  const groups = match
-    ? [...new Set(match.results.map((row) => row.group))]
-    : []
+  const groups = match ? [...new Set(match.results.map((row) => row.group))] : []
   const flags = match?.results.filter((row) => row.flag).length ?? 0
 
   return (
     <Container className="py-12">
       <Eyebrow>Patient portal</Eyebrow>
-      <h1 className="mt-2 max-w-xl font-display text-5xl tracking-tight">The report, once a doctor has released it.</h1>
+      <h1 className="mt-2 max-w-xl">Your reports</h1>
       <p className="mt-3 max-w-lg text-sm leading-6 text-ink/65">
-        Look up with the booking id and the mobile used at the desk. Until validation, you will see the sample moving — not a half-written result.
+        Signed in as {session.name}. These are the bookings on {phonePretty(session.phone)}. A result appears after a doctor releases it.
       </p>
-      {session?.role === "patient" && (
-        <div className="no-print mt-6">
-          <p className="text-sm">
-            Signed in as <span className="font-medium">{session.name}</span>
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {orders.filter((order) => order.phone === session.phone).map((order) => (
-              <button
-                key={order.id}
-                type="button"
-                className="rounded-full bg-paper px-3 py-1.5 text-xs ring-1 ring-line"
-                onClick={() => lookup(undefined, { id: order.id, phone: order.phone })}
-              >
-                {order.id} · {order.status}
-              </button>
-            ))}
-            {orders.every((order) => order.phone !== session.phone) && (
-              <p className="text-sm text-ink/55">No bookings on this mobile yet.</p>
-            )}
-          </div>
-        </div>
+      {sample && (
+        <p className="mt-4 max-w-lg rounded-md border border-line bg-white px-4 py-3 text-sm leading-6 text-ink/70">
+          Sample report on this account, so you can open a finished result before the lab system is connected. Your own bookings stay in this list.
+        </p>
       )}
-
-      <form className="no-print mt-8 grid gap-3 rounded-[28px] border border-line bg-paper p-5 md:grid-cols-[1fr_1fr_auto] md:items-end" onSubmit={(event) => lookup(event)}>
-        <Field label="Booking id">
-          <input className={inputClass} value={orderId} onChange={(event) => setOrderId(event.target.value)} placeholder="AR-48291" />
-        </Field>
-        <Field label="Mobile">
-          <input className={inputClass} value={phone} onChange={(event) => setPhone(event.target.value)} placeholder="98480 12345" />
-        </Field>
-        <Button type="submit">Open</Button>
-      </form>
-      <button
-        type="button"
-        className="no-print mt-3 text-sm text-teal"
-        onClick={() => lookup(undefined, { id: "AR-48291", phone: "9848012345" })}
-      >
-        Open the sample released report
-      </button>
-      {miss && <p className="mt-4 text-sm text-coral">No report for that pair. Check the id and the 10-digit mobile.</p>}
+      <div className="no-print mt-6 flex flex-wrap gap-2">
+        {list.map((order) => (
+          <button
+            key={order.id}
+            type="button"
+            className={`rounded-md px-3 py-1.5 text-xs font-semibold ring-1 ${match?.id === order.id ? "bg-teal text-white ring-teal" : "bg-white ring-line"}`}
+            onClick={() => setPicked(order.id)}
+          >
+            {order.id} · {order.id === "AR-SAMPLE" ? "Sample" : order.status}
+          </button>
+        ))}
+      </div>
 
       {match && (
         <article className="mt-8 rounded-[28px] border border-line bg-paper p-6">
@@ -159,7 +148,9 @@ export function Reports() {
               {match.note && <p className="mt-4 text-sm text-ink/70">Note: {match.note}</p>}
               <p className="mt-6 text-sm">Authorised by {match.authorisedBy ?? "the duty consultant"}.</p>
               <p className="mt-2 text-xs leading-5 text-ink/45">
-                Sample report for demonstration. It is not medical advice and it is not your record.
+                {match.id === "AR-SAMPLE"
+                  ? "Sample values for this demonstration. Not a medical result, and not stored as your lab record."
+                  : "Demonstration report. It is not medical advice."}
               </p>
             </div>
           )}
@@ -167,4 +158,30 @@ export function Reports() {
       )}
     </Container>
   )
+}
+
+function sampleReport(name: string, phone: string, account: { dob: string; gender: Order["gender"] } | null): Order {
+  const base = seedOrders.find((order) => order.status === "Released") ?? seedOrders[0]
+  return {
+    ...base,
+    id: "AR-SAMPLE",
+    patient: name,
+    phone,
+    age: account ? ageFromDob(account.dob) : base.age,
+    gender: account?.gender ?? base.gender,
+    centre: "Yanam",
+    mode: "Centre visit",
+    address: undefined,
+    note: "Sample report shown until the lab system is connected.",
+  }
+}
+
+function ageFromDob(dob: string) {
+  const born = new Date(dob)
+  if (Number.isNaN(born.getTime())) return 0
+  const now = new Date()
+  let age = now.getFullYear() - born.getFullYear()
+  const month = now.getMonth() - born.getMonth()
+  if (month < 0 || (month === 0 && now.getDate() < born.getDate())) age -= 1
+  return Math.max(0, age)
 }

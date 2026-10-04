@@ -1,7 +1,7 @@
 import { useState } from "react"
 import type { FormEvent } from "react"
 import { Link } from "react-router-dom"
-import { doctors, photos } from "../data/network"
+import { doctors } from "../data/network"
 import { modules } from "../data/modules"
 import { tests } from "../data/catalog"
 import { useStore } from "../context/Store"
@@ -104,50 +104,6 @@ export function Prescription() {
   )
 }
 
-export function About() {
-  useTitle("About")
-  return (
-    <div>
-      <Container className="py-12">
-        <Eyebrow>Since 2009</Eyebrow>
-        <h1 className="mt-2 max-w-3xl font-display text-5xl tracking-tight">Built in Hyderabad. Run, now, like a network that has to agree with itself.</h1>
-        <p className="mt-5 max-w-2xl text-sm leading-7 text-ink/70">
-          Aurora started as a single pathology bench on Road No. 12. Radiology, heart studies, and home collection came later. The awkward part was never the machines. It was seven centres writing seven kinds of report. Aurora OS is the agreement: one accession number, one validation step, one page the patient actually understands.
-        </p>
-      </Container>
-      <Container>
-        <Photo src={photos.corridor} alt="A quiet diagnostic centre corridor" className="h-[420px] rounded-[28px]" />
-      </Container>
-      <Container className="grid gap-4 py-10 md:grid-cols-4">
-        {[
-          ["2009", "First bench in Banjara Hills"],
-          ["2014", "MRI and CT under the same roof"],
-          ["2018", "Home collection with a cold chain"],
-          ["2022", "Aurora OS across the network"],
-        ].map(([year, copy]) => (
-          <article key={year} className="rounded-3xl border border-line bg-paper p-5">
-            <p className="font-display text-3xl text-coral">{year}</p>
-            <p className="mt-2 text-sm leading-6 text-ink/70">{copy}</p>
-          </article>
-        ))}
-      </Container>
-      <Container className="grid gap-4 pb-4 md:grid-cols-4">
-        {[
-          ["42", "centres"],
-          ["1,200+", "tests on the menu"],
-          ["6 hr", "routine blood TAT"],
-          ["98%", "samples inside TAT"],
-        ].map(([value, label]) => (
-          <div key={label} className="rounded-3xl border border-line bg-deep p-5 text-ink">
-            <p className="font-display text-3xl">{value}</p>
-            <p className="mt-1 text-sm text-ink/65">{label}</p>
-          </div>
-        ))}
-      </Container>
-    </div>
-  )
-}
-
 export function Doctors() {
   useTitle("Doctors")
   return (
@@ -157,7 +113,7 @@ export function Doctors() {
       <div className="mt-8 grid gap-5 md:grid-cols-2">
         {doctors.map((doctor) => (
           <article key={doctor.id} className="grid overflow-hidden rounded-[28px] border border-line bg-paper sm:grid-cols-[200px_1fr]">
-            <Photo src={doctor.photo} alt="" className="h-56 sm:h-full" />
+            <Photo src={doctor.photo} alt={doctor.name} face className="h-72 sm:h-full" />
             <div className="p-5">
               <h2 className="font-display text-3xl">{doctor.name}</h2>
               <p className="text-sm text-teal">{doctor.role}</p>
@@ -179,14 +135,14 @@ export function Contact() {
     <Container className="grid gap-10 py-12 lg:grid-cols-2">
       <div>
         <Eyebrow>Talk to us</Eyebrow>
-        <h1 className="mt-2 font-display text-5xl tracking-tight">A person answers 1800 420 2244.</h1>
+        <h1 className="mt-2 font-display text-5xl tracking-tight">Call the Yanam desk on 0884 232 4500.</h1>
         <p className="mt-4 text-sm leading-7 text-ink/70">
-          Reports, reschedules, and corporate camps. For a critical value already released, the duty pathologist calls the referring doctor directly.
+          Reports, slot changes, and home collection in Yanam. For a critical value already released, the duty pathologist calls the referring doctor directly.
         </p>
         <dl className="mt-6 space-y-3 text-sm">
-          <div><dt className="text-ink/45">Phone</dt><dd>1800 420 2244 · 7:00 AM to 9:00 PM</dd></div>
+          <div><dt className="text-ink/45">Phone</dt><dd>0884 232 4500 · 7:00 AM to 8:00 PM</dd></div>
           <div><dt className="text-ink/45">Email</dt><dd>care@auroradiagnostics.example</dd></div>
-          <div><dt className="text-ink/45">Flagship</dt><dd>Road No. 12, Banjara Hills, Hyderabad</dd></div>
+          <div><dt className="text-ink/45">Centre</dt><dd>D. No. 8-2-14, Ferry Road, Yanam, Puducherry 533464</dd></div>
         </dl>
       </div>
       <form

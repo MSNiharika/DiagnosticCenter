@@ -22,7 +22,7 @@ export function Login() {
       <Eyebrow>Sign in</Eyebrow>
       <h1 className="mt-2 max-w-2xl font-display text-5xl tracking-tight">Patient desk or staff desk.</h1>
       <p className="mt-3 max-w-xl text-sm leading-6 text-ink/65">
-        Both use the demonstration password <span className="font-medium text-ink">aurora</span>. A patient mobile opens their reports. A staff id opens the lab console.
+        A registered mobile opens only that patient's reports. Staff id <span className="font-medium text-ink">meera</span> opens the lab console. The sample patient is 9848012345 / aurora.
       </p>
       {session && (
         <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-line bg-paper px-4 py-3 text-sm">
@@ -51,7 +51,7 @@ export function Login() {
             { name: "phone", label: "Mobile", placeholder: "9848012345" },
             { name: "password", label: "Password", placeholder: "aurora", secret: true },
           ]}
-          hint="Try 9848012345 / aurora"
+          hint="Sample account: 9848012345 / aurora. New patients register first."
           onSubmit={(values) => {
             const error = signInPatient(values.phone ?? "", values.password ?? "")
             if (!error) navigate(next === "/console" ? "/reports" : next)
@@ -129,6 +129,11 @@ function LoginCard({
         {error && <p className="text-sm text-coral">{error}</p>}
         <Button type="submit">{title}</Button>
         <p className="text-xs text-ink/45">{hint}</p>
+        {id === "patient" && (
+          <Link to="/register" className="text-sm font-semibold text-teal">
+            New patient? Register
+          </Link>
+        )}
       </div>
     </form>
   )
