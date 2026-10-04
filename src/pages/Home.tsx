@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { ArrowRight, Clock3, FlaskConical, House, ShieldCheck } from "lucide-react"
+import { ArrowRight, Clock3, FileText, FlaskConical, House, MapPin, ScanLine, ShieldCheck, Stethoscope } from "lucide-react"
 import { Link, useNavigate } from "react-router-dom"
 import { packages, tests } from "../data/catalog"
 import { packageWorth } from "../data/catalog"
@@ -9,6 +9,15 @@ import { useStore } from "../context/Store"
 import { inr, relevanceScore, slotPassed, SLOT_TIMES, upcomingDays } from "../lib/utils"
 import { RelevanceSearch } from "../components/RelevanceSearch"
 import { ButtonLink, Container, Eyebrow, Photo, StatusPill, buttonClass, useTitle } from "../components/ui"
+
+const homeServices = [
+  { to: "/tests", icon: FlaskConical, label: "Lab tests" },
+  { to: "/packages", icon: Stethoscope, label: "Checkups" },
+  { to: "/imaging", icon: ScanLine, label: "Scans" },
+  { to: "/collection", icon: House, label: "Home collection" },
+  { to: "/reports", icon: FileText, label: "Reports" },
+  { to: "/centres", icon: MapPin, label: "Centres" },
+]
 
 const faqs = [
   {
@@ -36,51 +45,60 @@ export function Home() {
 
   return (
     <div>
-      <section className="relative overflow-hidden bg-deep text-ink">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(900px_420px_at_85%_-10%,rgba(196,101,74,0.12),transparent_55%)]" />
-        <Container className="relative grid items-center gap-10 py-14 lg:grid-cols-[1.05fr_0.95fr] lg:py-20">
+      <section className="border-b border-line bg-white">
+        <Container className="grid items-center gap-8 py-8 lg:grid-cols-[1.15fr_0.85fr] lg:py-10">
           <div>
-            <Eyebrow>Diagnostic network · {city}</Eyebrow>
-            <h1 className="mt-4 max-w-xl font-display tracking-tight">
-              Same-day answers, from a lab that shows its work.
-            </h1>
-            <p className="mt-5 max-w-lg text-base leading-7 text-ink/70">
-              Book blood tests, scans, and full-body checkups. Track the tube from your door to the pathologist. Routine reports land the same day.
+            <p className="text-sm font-semibold text-teal">Lab tests, scans, and health checkups in {city}</p>
+            <h1 className="mt-2 max-w-xl">Book a test. Get the report the same day.</h1>
+            <p className="mt-3 max-w-lg text-sm leading-6 text-ink/70">
+              Home collection from 7:00 AM. NABL and ISO 15189 processing. A pathologist releases every report before you can open it.
             </p>
             <HeroSearch />
-            <div className="mt-6 flex flex-wrap gap-2">
-              {["Complete Blood Count", "Thyroid Profile", "Vitamin D", "Full body", "MRI"].map((label) => (
-                <Link
-                  key={label}
-                  to={label === "Full body" ? "/packages/executive" : `/tests?q=${encodeURIComponent(label.replace(" Profile", "").replace(" (25-OH)", ""))}`}
-                  className="rounded-full border border-ink/15 px-3 py-1.5 text-xs text-ink/75 hover:border-ink/40 hover:text-ink"
-                >
+            <div className="mt-4 flex flex-wrap gap-2">
+              {[
+                ["CBC", "/tests?q=Complete%20Blood"],
+                ["Thyroid", "/tests?q=Thyroid"],
+                ["Vitamin D", "/tests?q=Vitamin"],
+                ["Full body checkup", "/packages"],
+                ["MRI", "/imaging"],
+              ].map(([label, to]) => (
+                <Link key={label} to={to} className="rounded-md border border-line bg-foam px-3 py-1.5 text-xs font-semibold text-ink hover:border-teal hover:text-teal">
                   {label}
                 </Link>
               ))}
             </div>
+            <p className="mt-4 text-xs font-medium text-ink/60">Offer AURORA20 · 20% off · Next slot {nextSlotLabel()}</p>
           </div>
-          <div className="relative">
-            <Photo src={photos.lab} alt="Scientist at a brightly lit laboratory bench" className="h-[460px] rounded-[28px] sm:h-[520px]" />
-            <LiveSlip />
-            <div className="absolute right-3 top-4 rounded-2xl bg-coral px-3 py-2 text-xs text-white shadow-lg">
-              Next open slot · {nextSlotLabel()}
+          <div className="overflow-hidden rounded-lg border border-line bg-white">
+            <Photo src={photos.lab} alt="Scientist at a laboratory bench" className="h-52 sm:h-64" />
+            <div className="grid grid-cols-3 divide-x divide-line border-t border-line text-center">
+              {[
+                ["6 hrs", "Routine reports"],
+                ["₹150", "Home visit under ₹500"],
+                ["NABL", "ISO 15189"],
+              ].map(([value, label]) => (
+                <div key={label} className="px-2 py-3">
+                  <p className="text-sm font-bold text-teal">{value}</p>
+                  <p className="mt-0.5 text-[11px] leading-4 text-ink/60">{label}</p>
+                </div>
+              ))}
             </div>
           </div>
         </Container>
       </section>
 
-      <div className="overflow-hidden border-b border-line bg-paper">
-        <div className="animate-marquee flex w-max gap-10 py-3 text-xs uppercase tracking-[0.18em] text-ink/55">
-          {Array.from({ length: 2 }).map((_, copy) => (
-            <div key={copy} className="flex gap-10 px-5">
-              {["NABL", "ISO 15189", "42 centres", "1,200+ tests", "Pathologist on every report", "Home collection before 11", "Critical values called out", "Cold-chain transport"].map((item) => (
-                <span key={`${copy}-${item}`}>{item}</span>
-              ))}
-            </div>
+      <section className="border-b border-line bg-foam">
+        <Container className="grid grid-cols-2 gap-3 py-4 sm:grid-cols-3 lg:grid-cols-6">
+          {homeServices.map((item) => (
+            <Link key={item.label} to={item.to} className="flex items-center gap-2 rounded-md border border-line bg-white px-3 py-3 text-sm font-semibold hover:border-teal">
+              <item.icon className="h-4 w-4 shrink-0 text-teal" />
+              {item.label}
+            </Link>
           ))}
-        </div>
-      </div>
+        </Container>
+      </section>
+
+      <LiveSlip />
 
       <RelevanceSearch />
 
@@ -89,7 +107,7 @@ export function Home() {
           <div className="flex items-end justify-between gap-4">
             <div>
               <Eyebrow>Book in a minute</Eyebrow>
-              <h2 className="mt-2 font-display text-4xl tracking-tight">Tests people ask for by name.</h2>
+              <h2 className="mt-2">Popular tests</h2>
             </div>
             <Link to="/tests" className="hidden items-center gap-1 text-sm text-teal sm:inline-flex">
               Full catalogue <ArrowRight className="h-4 w-4" />
@@ -97,16 +115,16 @@ export function Home() {
           </div>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {tests.filter((test) => test.popular).slice(0, 4).map((test) => (
-              <Link key={test.id} to={`/tests/${test.id}`} className="group rounded-3xl border border-line bg-paper p-5 transition hover:-translate-y-0.5 hover:border-ink/20">
-                <p className="text-[11px] uppercase tracking-[0.16em] text-ink/40">{test.department}</p>
-                <h3 className="mt-3 font-display text-2xl leading-tight group-hover:text-teal">{test.name}</h3>
-                <p className="mt-2 text-sm text-ink/60">{test.tat} · {test.sample}</p>
-                <div className="mt-5 flex items-end justify-between">
+              <Link key={test.id} to={`/tests/${test.id}`} className="flex flex-col rounded-md border border-line bg-white p-4 hover:border-teal">
+                <p className="text-[11px] font-semibold uppercase tracking-wide text-teal">{test.department}</p>
+                <h3 className="mt-2 text-base">{test.name}</h3>
+                <p className="mt-1 text-sm text-ink/60">{test.tat} · {test.sample}</p>
+                <div className="mt-4 flex items-end justify-between">
                   <p>
-                    <span className="text-lg font-medium">{inr(test.price)}</span>
+                    <span className="text-lg font-bold text-ink">{inr(test.price)}</span>
                     <span className="ml-2 text-xs text-ink/40 line-through">{inr(test.mrp)}</span>
                   </p>
-                  <span className="text-xs text-coral">View</span>
+                  <span className="rounded-md bg-coral px-2.5 py-1 text-xs font-semibold text-white">Book</span>
                 </div>
               </Link>
             ))}
@@ -119,7 +137,7 @@ export function Home() {
           <div className="flex items-end justify-between">
             <div>
               <Eyebrow>Health checkups</Eyebrow>
-              <h2 className="mt-2 font-display text-4xl tracking-tight">Packages with the padding taken out.</h2>
+              <h2 className="mt-2">Health checkup packages</h2>
             </div>
             <Link to="/packages" className="hidden text-sm text-teal sm:inline">
               Compare all
@@ -129,26 +147,26 @@ export function Home() {
             {packages.slice(0, 3).map((item) => {
               const save = packageWorth(item) - item.price
               return (
-                <article key={item.id} className="relative rounded-[24px] border border-line bg-paper p-5">
+                <article key={item.id} className="relative flex flex-col rounded-md border border-line bg-white p-5">
                   {item.badge && (
-                    <span className="absolute right-4 top-4 rounded-full bg-ink px-2.5 py-1 text-[10px] uppercase tracking-wider text-paper">
+                    <span className="absolute right-4 top-4 rounded bg-teal px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
                       {item.badge}
                     </span>
                   )}
-                  <p className="text-xs uppercase tracking-[0.16em] text-brass">{item.audience}</p>
-                  <h3 className="mt-2 font-display text-3xl">{item.name}</h3>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-teal">{item.audience}</p>
+                  <h3 className="mt-2 text-xl">{item.name}</h3>
                   <p className="mt-2 min-h-12 text-sm leading-6 text-ink/65">{item.summary}</p>
-                  <div className="my-4 border-t border-dashed border-sand" />
-                  <p className="text-sm text-ink/55">{item.testIds.length} tests · {item.tat}</p>
+                  <div className="my-4 border-t border-dashed border-line" />
+                  <p className="text-sm text-ink/55">{item.testIds.length} tests included · {item.tat}</p>
                   <div className="mt-2 flex items-end justify-between">
                     <p>
-                      <span className="font-display text-3xl">{inr(item.price)}</span>
+                      <span className="text-2xl font-bold">{inr(item.price)}</span>
                       <span className="ml-2 text-xs text-ink/40 line-through">{inr(item.mrp)}</span>
                     </p>
-                    <p className="text-xs text-teal">Save {inr(save)}</p>
+                    <p className="text-xs font-semibold text-teal">Save {inr(save)}</p>
                   </div>
-                  <Link to={`/packages/${item.id}`} className={`${buttonClass("ink", "sm")} mt-4`}>
-                    See what is included
+                  <Link to={`/packages/${item.id}`} className={`${buttonClass("coral", "sm")} mt-4`}>
+                    View package
                   </Link>
                 </article>
               )
@@ -160,7 +178,7 @@ export function Home() {
       <section className="bg-paper py-16">
         <Container>
           <Eyebrow>Departments</Eyebrow>
-          <h2 className="mt-2 max-w-xl font-display text-4xl tracking-tight">One building. Separate rooms for blood, pictures, and the heart.</h2>
+          <h2 className="mt-2 max-w-xl">Pathology, radiology, and cardiology</h2>
           <div className="mt-8 grid gap-3 md:grid-cols-4 md:grid-rows-2">
             <Dept href="/tests" image={photos.vials} title="Pathology" copy="Haematology, biochemistry, serology, and the counters that never close at lunch." className="md:col-span-2 md:row-span-2 min-h-72" />
             <Dept href="/imaging" image={photos.mri} title="Radiology" copy="MRI, CT, ultrasound, mammography." className="min-h-44 md:col-span-2" />
@@ -171,10 +189,10 @@ export function Home() {
 
       <section className="py-16">
         <Container className="grid items-center gap-10 lg:grid-cols-2">
-          <Photo src={photos.bench} alt="Sample tubes in a laboratory rack" className="h-[380px] rounded-[28px]" />
+          <Photo src={photos.bench} alt="Sample tubes in a laboratory rack" className="h-[320px] rounded-md" />
           <div>
             <Eyebrow>Home collection</Eyebrow>
-            <h2 className="mt-2 font-display text-4xl tracking-tight">The draw happens at the kitchen table. The lab still sees a barcode.</h2>
+            <h2 className="mt-2">Home sample collection</h2>
             <ul className="mt-6 space-y-4 text-sm leading-6 text-ink/75">
               <li className="flex gap-3"><House className="mt-0.5 h-4 w-4 shrink-0 text-coral" /> Slots from 7:00 AM. A named phlebotomist, not a pooled cab.</li>
               <li className="flex gap-3"><FlaskConical className="mt-0.5 h-4 w-4 shrink-0 text-coral" /> Sealed kit, temperature logger, and the same accession number as a walk-in.</li>
@@ -195,9 +213,9 @@ export function Home() {
               ["Called, not buried", "Critical values are phoned to the referring doctor before the PDF goes out. The portal shows that the call happened."],
               ["Cold chain you can ask about", "Home samples ride in logged boxes. If a tube is warm, it is rejected and redrawn — not quietly run."],
             ].map(([title, copy]) => (
-              <article key={title} className="rounded-3xl border border-line bg-paper p-6">
+              <article key={title} className="rounded-md border border-line bg-white p-5">
                 <ShieldCheck className="h-5 w-5 text-teal" />
-                <h3 className="mt-4 font-display text-2xl">{title}</h3>
+                <h3 className="mt-3 text-lg">{title}</h3>
                 <p className="mt-2 text-sm leading-6 text-ink/65">{copy}</p>
               </article>
             ))}
@@ -210,7 +228,7 @@ export function Home() {
           <div className="flex items-end justify-between">
             <div>
               <Eyebrow>{city}</Eyebrow>
-              <h2 className="mt-2 font-display text-4xl tracking-tight">Centres open this morning.</h2>
+              <h2 className="mt-2">Centres in {city}</h2>
             </div>
             <Link to="/centres" className="text-sm text-teal">
               All cities
@@ -218,10 +236,10 @@ export function Home() {
           </div>
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             {nearby.map((centre) => (
-              <Link key={centre.id} to={`/centres/${centre.id}`} className="grid overflow-hidden rounded-3xl border border-line bg-paper sm:grid-cols-[180px_1fr]">
+              <Link key={centre.id} to={`/centres/${centre.id}`} className="grid overflow-hidden rounded-md border border-line bg-white sm:grid-cols-[180px_1fr]">
                 <Photo src={centre.image} alt="" className="h-36 sm:h-full" />
                 <div className="p-5">
-                  <h3 className="font-display text-2xl">{centre.name}</h3>
+                  <h3 className="text-lg">{centre.name}</h3>
                   <p className="mt-1 text-sm text-ink/60">{centre.address}</p>
                   <p className="mt-3 text-sm">{centre.hours}</p>
                   <p className="mt-2 text-xs text-ink/50">{centre.services.join(" · ")}</p>
@@ -236,8 +254,8 @@ export function Home() {
         <Container>
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div className="max-w-xl">
-              <Eyebrow>Aurora OS</Eyebrow>
-              <h2 className="mt-2 font-display tracking-tight">The operating system behind the counter, the cooler, and the centrifuge.</h2>
+              <Eyebrow>For lab staff</Eyebrow>
+              <h2 className="mt-2">Front desk, samples, reports, and billing in one console.</h2>
             </div>
             <ButtonLink to="/console" variant="ink">
               Open today's queue
@@ -261,10 +279,10 @@ export function Home() {
       <section className="py-16">
         <Container>
           <Eyebrow>The people who sign</Eyebrow>
-          <h2 className="mt-2 font-display text-4xl">Duty consultants</h2>
+          <h2 className="mt-2">Our doctors</h2>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {doctors.map((doctor) => (
-              <Link key={doctor.id} to="/doctors" className="overflow-hidden rounded-3xl border border-line bg-paper">
+              <Link key={doctor.id} to="/doctors" className="overflow-hidden rounded-md border border-line bg-white">
                 <Photo src={doctor.photo} alt="" className="h-56" />
                 <div className="p-4">
                   <h3 className="font-medium">{doctor.name}</h3>
@@ -281,7 +299,7 @@ export function Home() {
         <Container className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
           <div>
             <Eyebrow>Before you book</Eyebrow>
-            <h2 className="mt-2 font-display text-4xl">Short answers.</h2>
+            <h2 className="mt-2">Common questions</h2>
           </div>
           <Faq />
         </Container>
@@ -317,38 +335,28 @@ function LiveSlip() {
   const visit = order.mode === "Home collection" ? "home draw" : "centre visit"
 
   return (
-    <div
-      className="absolute -left-2 bottom-6 w-[min(100%,300px)] sm:-left-8"
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-    >
-      <Link
-        key={order.id}
-        to={`/reports?order=${order.id}`}
-        className="slip-in block rounded-2xl border border-white/10 bg-ivory p-4 text-ink shadow-2xl"
-      >
-        <p className="text-[11px] uppercase tracking-[0.16em] text-brass">Live queue</p>
-        <p className="mt-1 font-mono text-sm">{order.id}</p>
-        <p className="mt-2 text-sm">
-          {order.patient} · {visit}
-        </p>
-        <div className="mt-3 flex items-center justify-between gap-2 text-xs">
-          <StatusPill status={order.status} />
-          <span>{flags > 0 ? `${flags} value${flags === 1 ? "" : "s"} to discuss` : order.slot}</span>
+    <section className="border-b border-line bg-white" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
+      <Container className="flex flex-wrap items-center gap-x-4 gap-y-2 py-3">
+        <p className="text-xs font-bold uppercase tracking-wide text-teal">Live queue</p>
+        <Link key={order.id} to={`/reports?order=${order.id}`} className="slip-in text-sm font-medium">
+          <span className="font-mono">{order.id}</span>
+          <span className="text-ink/70"> · {order.patient} · {visit}</span>
+        </Link>
+        <StatusPill status={order.status} />
+        <span className="text-xs text-ink/55">{flags > 0 ? `${flags} flagged` : order.slot}</span>
+        <div className="ml-auto flex gap-1.5">
+          {list.map((item, itemIndex) => (
+            <button
+              key={item.id}
+              type="button"
+              aria-label={`Show ${item.id}`}
+              onClick={() => setIndex(itemIndex)}
+              className={`h-1.5 rounded-full ${itemIndex === index ? "w-5 bg-teal" : "w-1.5 bg-sand"}`}
+            />
+          ))}
         </div>
-      </Link>
-      <div className="mt-2 flex gap-1.5 px-1">
-        {list.map((item, itemIndex) => (
-          <button
-            key={item.id}
-            type="button"
-            aria-label={`Show ${item.id}`}
-            onClick={() => setIndex(itemIndex)}
-            className={`h-1.5 rounded-full ${itemIndex === index ? "w-5 bg-ink" : "w-1.5 bg-ink/30"}`}
-          />
-        ))}
-      </div>
-    </div>
+      </Container>
+    </section>
   )
 }
 
@@ -388,16 +396,16 @@ function HeroSearch() {
         navigate(`/tests?q=${encodeURIComponent(q.trim())}&sort=relevance`)
       }}
     >
-      <div className="flex flex-col gap-2 rounded-[28px] bg-ivory p-1.5 sm:flex-row sm:items-center sm:rounded-full">
+      <div className="flex flex-col gap-2 sm:flex-row">
         <input
           value={q}
           onChange={(event) => setQ(event.target.value)}
-          placeholder="Search a test, scan, or package"
+          placeholder="Search tests, scans, or packages"
           aria-label="Search tests"
-          className="w-full bg-transparent px-4 py-2.5 text-sm text-ink outline-none placeholder:text-ink/40"
+          className="w-full rounded-md border border-line bg-white px-4 py-3 text-sm text-ink outline-none placeholder:text-ink/40 focus:border-teal"
         />
-        <button type="submit" className={buttonClass("coral")}>
-          Search by relevance
+        <button type="submit" className={`${buttonClass("coral")} shrink-0`}>
+          Search tests
         </button>
       </div>
       {matches.length > 0 && (
@@ -428,11 +436,11 @@ function Dept({
   className?: string
 }) {
   return (
-    <Link to={href} className={`group relative overflow-hidden rounded-[24px] ${className ?? ""}`}>
+    <Link to={href} className={`group relative overflow-hidden rounded-md ${className ?? ""}`}>
       <Photo src={image} alt="" className="absolute inset-0 h-full w-full" />
       <div className="absolute inset-0 bg-gradient-to-t from-ink via-ink/25 to-transparent" />
       <div className="absolute bottom-0 p-5 text-ivory">
-        <h3 className="font-display text-3xl">{title}</h3>
+        <h3 className="text-xl text-white">{title}</h3>
         <p className="mt-1 max-w-xs text-sm text-ivory/75">{copy}</p>
       </div>
     </Link>

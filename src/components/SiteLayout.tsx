@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { Menu, Phone, ShoppingBag, X } from "lucide-react"
+import { ChevronDown, Menu, Phone, ShoppingBag, X } from "lucide-react"
 import { Link, NavLink, Outlet, useLocation } from "react-router-dom"
 import { cities } from "../data/network"
 import { useStore } from "../context/Store"
@@ -22,7 +22,6 @@ export function SiteLayout() {
   const [bag, setBag] = useState(false)
   const [cityOpen, setCityOpen] = useState(false)
   const [menuLogin, setMenuLogin] = useState(false)
-  const [progress, setProgress] = useState(0)
   const location = useLocation()
 
   useEffect(() => {
@@ -31,16 +30,6 @@ export function SiteLayout() {
     setCityOpen(false)
     setMenuLogin(false)
     window.scrollTo(0, 0)
-  }, [location.pathname])
-
-  useEffect(() => {
-    const onScroll = () => {
-      const max = document.documentElement.scrollHeight - window.innerHeight
-      setProgress(max > 0 ? window.scrollY / max : 0)
-    }
-    onScroll()
-    window.addEventListener("scroll", onScroll, { passive: true })
-    return () => window.removeEventListener("scroll", onScroll)
   }, [location.pathname])
 
   useEffect(() => {
@@ -55,38 +44,21 @@ export function SiteLayout() {
       <a href="#main" className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[80] focus:rounded-full focus:bg-paper focus:px-4 focus:py-2">
         Skip to content
       </a>
-      <header className="sticky top-0 z-40 px-3 pt-3 sm:px-5">
-        <div className="site-nav-bar">
-          <Link to="/" className="site-logo" aria-label="Aurora Diagnostics home">
-            <span className="site-logo-mark" aria-hidden>
-              A
-            </span>
-            <span className="site-logo-name">Aurora</span>
-          </Link>
-          <span className="site-nav-split" aria-hidden />
-          <nav className="site-nav-desktop" aria-label="Primary">
-            {links.map((link) => (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                className={({ isActive }) => `site-nav-item${isActive ? " is-active" : ""}`}
-              >
-                {link.label}
-              </NavLink>
-            ))}
-          </nav>
-          <div className="ml-auto hidden items-center gap-3 xl:flex">
+      <header className="sticky top-0 z-40 border-b border-line bg-white shadow-[0_1px_0_rgba(18,38,58,0.04)]">
+        <div className="hidden border-b border-line bg-foam sm:block">
+          <Container className="flex h-9 items-center justify-end gap-5">
             <div className="relative">
-              <button type="button" className="nav-link" onClick={() => setCityOpen((value) => !value)}>
+              <button type="button" className="nav-link inline-flex items-center gap-1" onClick={() => setCityOpen((value) => !value)}>
                 {city}
+                <ChevronDown className="h-3 w-3" />
               </button>
               {cityOpen && (
-                <div className="absolute right-0 top-full z-50 mt-2 w-44 rounded-2xl border border-line bg-paper p-1.5 text-ink shadow-xl">
+                <div className="absolute right-0 top-full z-50 mt-2 w-44 rounded-md border border-line bg-paper p-1 text-ink shadow-lg">
                   {cities.map((item) => (
                     <button
                       key={item}
                       type="button"
-                      className="block w-full rounded-xl px-3 py-2 text-left text-sm normal-case tracking-normal hover:bg-ivory"
+                      className="block w-full rounded px-3 py-2 text-left text-sm hover:bg-foam"
                       onClick={() => {
                         setCity(item)
                         setCityOpen(false)
@@ -98,57 +70,49 @@ export function SiteLayout() {
                 </div>
               )}
             </div>
-            <a href="tel:18004202244" className="nav-link inline-flex items-center gap-1">
-              <Phone className="h-3 w-3" /> 1800 420 2244
+            <a href="tel:18004202244" className="nav-link inline-flex items-center gap-1.5">
+              <Phone className="h-3.5 w-3.5 text-teal" /> 1800 420 2244
             </a>
-            {session ? (
-              <>
-                <Link to={session.role === "staff" ? "/console" : "/reports"} className="nav-link">
-                  {session.role === "staff" ? "Console" : session.name.split(" ")[0]}
-                </Link>
-                <button type="button" className="nav-link" onClick={signOut}>
-                  Sign out
-                </button>
-              </>
-            ) : (
-              <div className="group relative">
-                <button type="button" className="nav-link" aria-haspopup="menu">
-                  Login
-                </button>
-                <div className="invisible absolute right-0 top-full z-50 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
-                  <div role="menu" className="w-52 rounded-2xl border border-line bg-paper p-1.5 text-ink shadow-xl">
-                    <Link role="menuitem" to="/login" className="block rounded-xl px-3 py-2 text-left text-sm normal-case tracking-normal hover:bg-ivory">
-                      Patient
-                    </Link>
-                    <Link role="menuitem" to="/login?as=staff" className="block rounded-xl px-3 py-2 text-left text-sm normal-case tracking-normal hover:bg-ivory">
-                      Staff
-                    </Link>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-          <button
-            type="button"
-            className="relative ml-2 grid h-9 w-9 shrink-0 place-items-center rounded-full border border-ink/15"
-            aria-label={`Booking list, ${cart.length} items`}
-            onClick={() => setBag(true)}
-          >
-            <ShoppingBag className="h-3.5 w-3.5" />
-            {cart.length > 0 && (
-              <span className="absolute -right-1 -top-1 grid h-4 min-w-4 place-items-center rounded-full bg-coral px-1 text-[9px] text-ivory">
-                {cart.length}
-              </span>
-            )}
-          </button>
-          <Link to="/book" className="site-nav-enquire">
-            Book
-          </Link>
-          <button type="button" className="site-nav-menu" aria-label="Open menu" onClick={() => setOpen(true)}>
-            <Menu className="mr-1 h-3.5 w-3.5" /> Menu
-          </button>
-          <span className="site-nav-progress" style={{ transform: `scaleX(${progress})` }} />
+            <SessionLinks session={session} signOut={signOut} />
+          </Container>
         </div>
+        <Container className="flex h-16 items-center gap-2">
+          <Link to="/" aria-label="Aurora Diagnostics home" className="shrink-0">
+            <Logo />
+          </Link>
+          <nav className="site-nav-desktop" aria-label="Primary">
+            {links.map((link) => (
+              <NavLink
+                key={link.to}
+                to={link.to}
+                className={({ isActive }) => `site-nav-item${isActive ? " is-active" : ""}`}
+              >
+                {link.label}
+              </NavLink>
+            ))}
+          </nav>
+          <div className="ml-auto flex items-center gap-2">
+            <button
+              type="button"
+              className="relative grid h-10 w-10 shrink-0 place-items-center rounded-md border border-line bg-white"
+              aria-label={`Booking list, ${cart.length} items`}
+              onClick={() => setBag(true)}
+            >
+              <ShoppingBag className="h-4 w-4" />
+              {cart.length > 0 && (
+                <span className="absolute -right-1.5 -top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-coral px-1 text-[9px] font-bold text-white">
+                  {cart.length}
+                </span>
+              )}
+            </button>
+            <Link to="/book" className={`${buttonClass("coral", "sm")} hidden sm:inline-flex`}>
+              Book a test
+            </Link>
+            <button type="button" className="grid h-10 w-10 place-items-center rounded-md border border-line lg:hidden" aria-label="Open menu" onClick={() => setOpen(true)}>
+              <Menu className="h-4 w-4" />
+            </button>
+          </div>
+        </Container>
       </header>
 
       <main id="main">
@@ -161,13 +125,16 @@ export function SiteLayout() {
           <SocialLinks />
         </Container>
       </div>
-      <footer className="bg-deep text-ink">
+      <footer className="bg-ink text-white">
         <Container className="grid gap-10 py-14 md:grid-cols-4">
           <div className="md:col-span-1">
-            <Logo />
-            <p className="mt-4 max-w-xs text-sm leading-6 text-ink/70">
-              A diagnostic network for blood tests, scans, and heart studies — and the operating system the lab runs on.
+            <Logo light />
+            <p className="mt-4 max-w-xs text-sm leading-6 text-white/70">
+              Blood tests, scans, and health checkups. Home collection across the city, with reports released by a doctor.
             </p>
+            <a href="tel:18004202244" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-white">
+              <Phone className="h-4 w-4" /> 1800 420 2244
+            </a>
           </div>
           <FooterCol
             title="Book"
@@ -199,8 +166,8 @@ export function SiteLayout() {
             ]}
           />
         </Container>
-        <div className="border-t border-line">
-          <Container className="flex flex-col gap-2 py-5 text-xs text-ink/50 sm:flex-row sm:justify-between">
+        <div className="border-t border-white/15">
+          <Container className="flex flex-col gap-2 py-5 text-xs text-white/50 sm:flex-row sm:justify-between">
             <p>Demonstration interface. Sample patients, prices, and reports. Not a medical service.</p>
             <p>© {new Date().getFullYear()} Aurora Diagnostics</p>
           </Container>
@@ -229,17 +196,20 @@ export function SiteLayout() {
               ))}
             </div>
             {links.map((link) => (
-              <Link key={link.to} to={link.to} className="font-display text-2xl">
+              <Link key={link.to} to={link.to} className="border-b border-line py-2 text-base font-semibold">
                 {link.label}
               </Link>
             ))}
-            <Link to="/corporate" className="font-display text-2xl">
+            <Link to="/corporate" className="border-b border-line py-2 text-base font-semibold">
               Corporate
             </Link>
-            <Link to="/about" className="font-display text-2xl">
+            <Link to="/about" className="border-b border-line py-2 text-base font-semibold">
               About
             </Link>
-            <button type="button" className="text-left font-display text-2xl" aria-expanded={menuLogin} onClick={() => setMenuLogin((value) => !value)}>
+            <a href="tel:18004202244" className="border-b border-line py-2 text-base font-semibold">
+              1800 420 2244
+            </a>
+            <button type="button" className="border-b border-line py-2 text-left text-base font-semibold" aria-expanded={menuLogin} onClick={() => setMenuLogin((value) => !value)}>
               Login
             </button>
             {menuLogin && (
@@ -252,7 +222,7 @@ export function SiteLayout() {
                 </Link>
               </div>
             )}
-            <ButtonLink to="/book" variant="ink" className="mt-4 w-fit">
+            <ButtonLink to="/book" className="mt-4 w-fit">
               Book a test
             </ButtonLink>
           </Container>
@@ -308,14 +278,52 @@ export function SiteLayout() {
   )
 }
 
+function SessionLinks({
+  session,
+  signOut,
+}: {
+  session: { role: "patient"; name: string; phone: string } | { role: "staff"; name: string } | null
+  signOut: () => void
+}) {
+  if (session) {
+    return (
+      <>
+        <Link to={session.role === "staff" ? "/console" : "/reports"} className="nav-link">
+          {session.role === "staff" ? "Console" : session.name.split(" ")[0]}
+        </Link>
+        <button type="button" className="nav-link" onClick={signOut}>
+          Sign out
+        </button>
+      </>
+    )
+  }
+  return (
+    <div className="group relative">
+      <button type="button" className="nav-link" aria-haspopup="menu">
+        Login
+      </button>
+      <div className="invisible absolute right-0 top-full z-50 pt-2 opacity-0 transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+        <div role="menu" className="w-52 rounded-md border border-line bg-paper p-1 text-ink shadow-lg">
+          <Link role="menuitem" to="/login" className="block rounded px-3 py-2 text-left text-sm hover:bg-foam">
+            Patient login
+          </Link>
+          <Link role="menuitem" to="/login?as=staff" className="block rounded px-3 py-2 text-left text-sm hover:bg-foam">
+            Staff login
+          </Link>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function FooterCol({ title, items }: { title: string; items: string[][] }) {
   return (
     <div>
-      <p className="text-xs uppercase tracking-[0.16em] text-ink/45">{title}</p>
-      <ul className="mt-3 space-y-2 text-sm text-ink/75">
+      <p className="text-xs font-semibold uppercase tracking-wide text-white/50">{title}</p>
+      <ul className="mt-3 space-y-2 text-sm text-white/80">
         {items.map(([to, label]) => (
           <li key={label}>
-            <Link to={to} className="hover:text-ink">
+            <Link to={to} className="hover:text-white">
               {label}
             </Link>
           </li>

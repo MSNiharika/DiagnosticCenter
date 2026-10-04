@@ -1,10 +1,9 @@
-import { useRef, useState } from "react"
+import { useState } from "react"
 import type { LucideIcon } from "lucide-react"
 import {
   Activity,
   Baby,
   Bone,
-  ChevronRight,
   Droplet,
   FlaskConical,
   Heart,
@@ -44,7 +43,6 @@ const icons: Record<string, LucideIcon> = {
 }
 
 export function RelevanceSearch() {
-  const scroller = useRef<HTMLDivElement>(null)
   const [active, setActive] = useState<string | null>(null)
   const [query, setQuery] = useState("")
   const concern = concerns.find((item) => item.id === active)
@@ -56,9 +54,10 @@ export function RelevanceSearch() {
   return (
     <section id="search-by-relevance" className="bg-paper py-14">
       <Container>
-        <h2 className="text-center font-display text-4xl tracking-tight">Search by relevance</h2>
-        <div className="relative mt-8">
-          <div ref={scroller} className="flex gap-4 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <h2>Find tests by health concern</h2>
+        <p className="mt-1 text-sm text-ink/60">Choose a concern to see the tests we run for it, with the price on each card.</p>
+        <div className="relative mt-6">
+          <div className="grid grid-cols-4 gap-3 sm:grid-cols-6 lg:grid-cols-8">
             {concerns.map((item) => {
               const Icon = icons[item.id] ?? FlaskConical
               const on = item.id === active
@@ -71,10 +70,10 @@ export function RelevanceSearch() {
                     setActive(item.id)
                     setQuery("")
                   }}
-                  className="w-[4.75rem] shrink-0 text-center"
+                  className="text-center"
                 >
                   <span
-                    className={`mx-auto grid h-16 w-16 place-items-center rounded-full bg-foam text-ink ${on ? "ring-2 ring-coral ring-offset-2 ring-offset-paper" : ""}`}
+                    className={`mx-auto grid h-14 w-14 place-items-center rounded-md border bg-white text-teal ${on ? "border-teal bg-foam" : "border-line"}`}
                   >
                     <Icon className="h-6 w-6" aria-hidden />
                   </span>
@@ -83,26 +82,18 @@ export function RelevanceSearch() {
               )
             })}
           </div>
-          <button
-            type="button"
-            aria-label="Show more groups"
-            className="absolute -right-1 top-3 grid h-10 w-10 place-items-center rounded-full border border-line bg-paper shadow-sm"
-            onClick={() => scroller.current?.scrollBy({ left: 320, behavior: "smooth" })}
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
         </div>
 
         {concern && (
           <div className="mt-8">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-              <h3 className="font-display text-3xl tracking-tight sm:w-40">{concern.label}</h3>
+              <h3 className="text-lg sm:w-40">{concern.label}</h3>
               <input
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search tests in this group"
+                placeholder="Filter tests in this group"
                 aria-label={`Search ${concern.label} tests`}
-                className="w-full rounded-full border border-ink/20 bg-paper px-5 py-3 text-sm outline-none placeholder:text-ink/40 focus:border-ink"
+                className="w-full rounded-md border border-line bg-white px-4 py-2.5 text-sm outline-none placeholder:text-ink/40 focus:border-teal"
               />
             </div>
             {tests.length === 0 ? (
@@ -113,10 +104,10 @@ export function RelevanceSearch() {
                   <li key={test.id}>
                     <Link
                       to={`/tests/${test.id}`}
-                      className="flex min-h-28 flex-col items-center justify-center rounded-2xl border border-ink/15 px-4 py-6 text-center transition hover:border-ink"
+                      className="flex items-center justify-between gap-3 rounded-md border border-line bg-white px-4 py-3 hover:border-teal"
                     >
-                      <span className="text-sm font-medium uppercase tracking-wide">{test.name}</span>
-                      <span className="mt-2 text-xs text-ink/50">{inr(test.price)}</span>
+                      <span className="text-left text-sm font-semibold">{test.name}</span>
+                      <span className="shrink-0 text-sm font-bold text-teal">{inr(test.price)}</span>
                     </Link>
                   </li>
                 ))}

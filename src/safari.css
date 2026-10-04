@@ -10,11 +10,11 @@ html.is-safari body {
 }
 
 html.is-safari h1 {
-  font-size: clamp(1.45rem, 0.85rem + 1.2vw, 1.9rem);
+  font-size: clamp(1.35rem, 0.85rem + 1vw, 1.7rem);
 }
 
 html.is-safari h2 {
-  font-size: clamp(1.2rem, 0.85rem + 0.6vw, 1.5rem);
+  font-size: clamp(1.15rem, 0.85rem + 0.5vw, 1.4rem);
 }
 
 html.is-safari .font-display {
@@ -22,31 +22,10 @@ html.is-safari .font-display {
 }
 
 html.is-safari .nav-link {
-  font-size: 9px;
-  letter-spacing: 0.08em;
-}
-
-html.is-safari .site-nav-bar {
-  height: 3.5rem;
-}
-
-html.is-safari .site-logo-mark {
-  width: 1.85rem;
-  height: 1.85rem;
-  font-size: 0.62rem;
-}
-
-html.is-safari .site-logo-name {
-  font-size: 0.95rem;
+  font-size: 11px;
 }
 
 html.is-safari .site-nav-item {
-  padding: 0.28rem 0.32rem 0.42rem;
-  font-size: 0.88rem;
+  padding: 0.4rem 0.35rem;
+  font-size: 0.78rem;
 }
-
-html.is-safari .site-nav-enquire {
-  padding: 0.32rem 0.7rem;
-  font-size: 0.82rem;
-}
-

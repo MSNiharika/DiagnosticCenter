@@ -24,7 +24,7 @@ const buttonStyles = {
 
 export function buttonClass(variant: keyof typeof buttonStyles = "coral", size: "sm" | "md" = "md") {
   return cn(
-    "inline-flex items-center justify-center gap-2 rounded-full font-medium transition disabled:cursor-not-allowed disabled:opacity-40",
+    "inline-flex items-center justify-center gap-2 rounded-md font-semibold transition disabled:cursor-not-allowed disabled:opacity-40",
     size === "sm" ? "px-3.5 py-1.5 text-xs" : "px-5 py-2.5 text-sm",
     buttonStyles[variant],
   )
@@ -66,26 +66,20 @@ export function Logo({ light = false }: { light?: boolean }) {
   return (
     <span className="flex items-center gap-2.5">
       <svg viewBox="0 0 36 36" className="h-9 w-9 shrink-0" aria-hidden>
-        <rect width="36" height="36" rx="11" fill={light ? "var(--color-paper)" : "var(--color-ink)"} />
+        <rect width="36" height="36" rx="8" fill={light ? "var(--color-paper)" : "var(--color-teal)"} />
         <path
-          d="M7 23c3.6-7 7-9.2 11-9.2S25.4 16 29 23"
+          d="M18 8v20M8 18h20"
           fill="none"
-          stroke={light ? "var(--color-ink)" : "var(--color-paper)"}
-          strokeWidth="2.2"
+          stroke={light ? "var(--color-teal)" : "#fff"}
+          strokeWidth="3.2"
           strokeLinecap="round"
         />
-        <circle cx="18" cy="13.2" r="2.1" fill="var(--color-coral)" />
       </svg>
       <span className="leading-none">
-        <span className={cn("block font-display text-[1.35rem] tracking-tight", light ? "text-ivory" : "text-ink")}>
+        <span className={cn("block text-[1.05rem] font-extrabold tracking-tight", light ? "text-white" : "text-ink")}>
           Aurora
         </span>
-        <span
-          className={cn(
-            "mt-0.5 block text-[10px] uppercase tracking-[0.22em]",
-            light ? "text-ivory/70" : "text-ink/50",
-          )}
-        >
+        <span className={cn("mt-0.5 block text-[10px] font-semibold uppercase tracking-[0.14em]", light ? "text-white/70" : "text-teal")}>
           Diagnostics
         </span>
       </span>
@@ -113,7 +107,7 @@ export function Photo({ src, alt, className }: { src: string; alt: string; class
 
 export function Eyebrow({ children, light = false }: { children: ReactNode; light?: boolean }) {
   return (
-    <p className={cn("text-xs font-medium uppercase tracking-[0.18em]", light ? "text-ivory/70" : "text-brass")}>
+    <p className={cn("text-xs font-semibold uppercase tracking-[0.08em]", light ? "text-ivory/70" : "text-teal")}>
       {children}
     </p>
   )
@@ -132,7 +126,7 @@ export function StatusPill({ status }: { status: OrderStatus | string }) {
 }
 
 export const inputClass =
-  "w-full rounded-2xl border border-line bg-paper px-3.5 py-2.5 text-sm text-ink outline-none placeholder:text-ink/35 focus:border-teal"
+  "w-full rounded-md border border-line bg-paper px-3.5 py-2.5 text-sm text-ink outline-none placeholder:text-ink/35 focus:border-teal"
 
 export function Field({ label, children }: { label: string; children: ReactNode }) {
   return (

@@ -58,7 +58,7 @@ export function Tests({ preset }: { preset?: "scan" }) {
       <Eyebrow>{preset === "scan" ? "Imaging & cardiology" : "Catalogue"}</Eyebrow>
       <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
         <h1 className="max-w-xl font-display text-5xl tracking-tight">
-          {preset === "scan" ? "Scans and heart studies, with the prep written down." : "Every test we run, with a price you can see."}
+          {preset === "scan" ? "Scans and heart studies" : "Lab tests"}
         </h1>
         <p className="max-w-sm text-sm leading-6 text-ink/60">
           {rows.length} results. Home collection is offered only where a sealed kit can travel.
